@@ -101,3 +101,11 @@
 - Hugging Face dataset `LMSerg/iola-gemma3-router-sft` для обучения первого LoRA-адаптера `gemma3:1b`.
 - Dataset card для Hugging Face с описанием train/eval файлов и JSON/tool-call контракта.
 - Ссылка на HF dataset в README и документации training pack.
+
+## v0.1.11 - 2026-05-27
+
+Добавлено:
+
+- HF Jobs/UV training script `training/train_gemma3_router_lora.py` для LoRA-обучения `google/gemma-3-1b-it`.
+- Документация запуска `gemma3-router-lora-job.md` с командой, лимитом времени, мониторингом и критерием приемки.
+- Фиксация output model repo `LMSerg/iola-gemma3-router-gemma3-1b-lora`.

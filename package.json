@@ -1,6 +1,6 @@
 {
   "name": "iola-small-model-lab",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Исследовательская лаборатория маленьких локальных моделей на открытых данных Йошкар-Олы.",
   "license": "MIT",
   "type": "module",
