@@ -9,7 +9,7 @@
 | Архитектурные стратегии | [conditional-memory](https://github.com/yasg1988/iola-small-model-lab/wiki/conditional-memory) · [sparse-escalation](https://github.com/yasg1988/iola-small-model-lab/wiki/sparse-escalation) · [early-exit](https://github.com/yasg1988/iola-small-model-lab/wiki/early-exit) |
 | Проверка и консенсус | [strict-skill](https://github.com/yasg1988/iola-small-model-lab/wiki/strict-skill) · [verify](https://github.com/yasg1988/iola-small-model-lab/wiki/verify) · [council](https://github.com/yasg1988/iola-small-model-lab/wiki/council) |
 | Гибридные стратегии | [skill-router](https://github.com/yasg1988/iola-small-model-lab/wiki/skill-router) · [memory-verified](https://github.com/yasg1988/iola-small-model-lab/wiki/memory-verified) · [escalation-ladder](https://github.com/yasg1988/iola-small-model-lab/wiki/escalation-ladder) |
-| Подбор моделей | [профиль ПК](docs/model-selection/local-pc-profile-2026-05-27.md) · [план мастера iola](docs/model-selection/iola-cli-local-model-wizard-plan.md) · [MoE/Sparse](docs/model-selection/moe-sparse-models-research.md) |
+| Подбор моделей | [итог исследования](docs/model-selection/research-conclusion-2026-05-27.md) · [профиль ПК](docs/model-selection/local-pc-profile-2026-05-27.md) · [план мастера iola](docs/model-selection/iola-cli-local-model-wizard-plan.md) · [MoE/Sparse](docs/model-selection/moe-sparse-models-research.md) |
 | Бенчмарки | [стратегии](benchmarks/2026-05-27-strategy-baseline.md) · [Ollama-модели](benchmarks/2026-05-27-ollama-node26.md) |
 
 Исследовательская лаборатория маленьких локальных моделей на открытых данных Йошкар-Олы.
@@ -122,6 +122,8 @@ qwen3:1.7b     ██████____ 60%
 План внедрения в будущий мастер `iola`: [подбор локальной модели](docs/model-selection/iola-cli-local-model-wizard-plan.md).
 
 MoE/Sparse-кандидаты и раннеры: [исследование MoE/Sparse](docs/model-selection/moe-sparse-models-research.md).
+
+Итог исследовательского этапа: сырые локальные модели и крупные MoE/Sparse-кандидаты не дали надежного продукта на слабом ПК; следующий этап строится вокруг RAG/GraphRAG, FastAPI/MCP и LoRA-адаптеров маленькой модели. Подробно: [итог исследования](docs/model-selection/research-conclusion-2026-05-27.md).
 
 ## Что внутри
 
