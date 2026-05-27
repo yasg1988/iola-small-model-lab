@@ -27,6 +27,8 @@ SFT-набор для отдельного исторического LoRA-ад�
 | `data/history-eval-v1.jsonl` | 16 | Held-out eval rows without exact train overlap. |
 | `data/history-train-v2.jsonl` | 56 | V2 train rows with targeted fixes after first eval. |
 | `data/history-eval-v2.jsonl` | 16 | V2 held-out eval rows. |
+| `data/history-train-v3.jsonl` | 65 | V3 train rows with targeted fixes after second eval. |
+| `data/history-eval-v3.jsonl` | 16 | V3 held-out eval rows. |
 
 ## Behavior
 

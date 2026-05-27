@@ -34,6 +34,7 @@ function isJsonToolCall(value) {
 const files = [
   ["history-train-v1.jsonl", "history-eval-v1.jsonl"],
   ["history-train-v2.jsonl", "history-eval-v2.jsonl"],
+  ["history-train-v3.jsonl", "history-eval-v3.jsonl"],
 ];
 
 for (const [trainFile, evalFile] of files) {

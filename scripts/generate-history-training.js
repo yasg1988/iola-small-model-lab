@@ -454,7 +454,70 @@ function pushV2({ id, type, topic, question, answer, tags = [] }) {
 await writeJsonl("history-train-v2.jsonl", trainV2);
 await writeJsonl("history-eval-v2.jsonl", evalV2);
 
+const trainV3 = [...trainV2];
+const evalV3 = evalV2.map((item) => ({ ...item, dataset: "history-eval-v3" }));
+
+function pushV3({ id, type, topic, question, answer, tags = [] }) {
+  trainV3.push(
+    row({
+      id: `history-train-v3-${id}`,
+      dataset: "history-train-v3",
+      sourceId: "manual-history-v3",
+      type,
+      topic,
+      question,
+      answer,
+      tags: ["history", type, ...tags],
+    }),
+  );
+}
+
+[
+  "точная дата когда Царевококшайск переименовали в Краснококшайск",
+  "не просто год а дата переименования Царевококшайска",
+  "какого числа Царевококшайск стал Краснококшайском",
+  "в каком году и какого числа Царевококшайск стал Краснококшайском",
+  "дата переименования Царевококшайска в Краснококшайск",
+].forEach((question, index) =>
+  pushV3({
+    id: `rename-1919-exact-${index + 1}`,
+    type: "direct_answer",
+    topic: "rename_1919",
+    question,
+    answer: "Царевококшайск был переименован в Краснококшайск 17 февраля 1919 года.",
+    tags: ["old_names", "exact_date"],
+  }),
+);
+
+[
+  "найди источник о переименованиях Царевококшайска Краснококшайска и Йошкар-Олы",
+  "нужен источник по названиям Царевококшайск Краснококшайск Йошкар-Ола",
+  "подбери источник по цепочке Царевококшайск Краснококшайск Йошкар-Ола",
+  "источник по переименованию Царевококшайск Краснококшайск Йошкар-Ола 1919 1928",
+].forEach((question, index) =>
+  pushV3({
+    id: `source-renames-exact-${index + 1}`,
+    type: "source_required",
+    topic: "source_renames",
+    question,
+    answer: assistantJson({
+      action: "tool_call",
+      tool: "rag_search",
+      args: {
+        query: "Царевококшайск Краснококшайск Йошкар-Ола переименование 1919 1928 источник",
+        collections: ["city_history", "official_documents"],
+      },
+    }),
+    tags: ["rag_search", "old_names"],
+  }),
+);
+
+await writeJsonl("history-train-v3.jsonl", trainV3);
+await writeJsonl("history-eval-v3.jsonl", evalV3);
+
 console.log(`Generated history-train-v1.jsonl: ${train.length} rows`);
 console.log(`Generated history-eval-v1.jsonl: ${evals.length} rows`);
 console.log(`Generated history-train-v2.jsonl: ${trainV2.length} rows`);
 console.log(`Generated history-eval-v2.jsonl: ${evalV2.length} rows`);
+console.log(`Generated history-train-v3.jsonl: ${trainV3.length} rows`);
+console.log(`Generated history-eval-v3.jsonl: ${evalV3.length} rows`);

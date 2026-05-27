@@ -141,6 +141,7 @@ MoE/Sparse-кандидаты и раннеры: [исследование MoE/S
 - `datasets/history-train-v1.jsonl` - train-набор исторического адаптера: прямые стабильные ответы, source-required RAG и clarify.
 - `datasets/history-eval-v1.jsonl` - eval-набор исторического адаптера без точного пересечения с train.
 - `datasets/history-train-v2.jsonl` - усиленный history train-набор после первого eval-прогона.
+- `datasets/history-train-v3.jsonl` - усиленный history train-набор после второго eval-прогона.
 - `scripts/run-evaluation.js` - детерминированные базовые стратегии без LLM.
 - `scripts/run-ollama-evaluation.js` - реальные прогоны через локальный Ollama API.
 - `scripts/generate-router-training.js` - сборка router training pack без пересечения с eval-набором.
@@ -177,7 +178,7 @@ npm run validate:router
 
 ## Версия
 
-Текущая публичная версия: `v0.1.21`.
+Текущая публичная версия: `v0.1.22`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).
 

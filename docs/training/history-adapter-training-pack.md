@@ -18,6 +18,8 @@
 | `datasets/history-eval-v1.jsonl` | 16 | Eval-набор без точного пересечения с train. |
 | `datasets/history-train-v2.jsonl` | 56 | V2-набор с усилением ошибок первого прогона. |
 | `datasets/history-eval-v2.jsonl` | 16 | V2 eval на той же поверхности. |
+| `datasets/history-train-v3.jsonl` | 65 | V3-набор с усилением точной даты 1919 и RAG по переименованиям. |
+| `datasets/history-eval-v3.jsonl` | 16 | V3 eval на той же поверхности. |
 
 ## Команды
 
@@ -44,6 +46,7 @@ npm test
 | Job | Статус | Вывод |
 | --- | --- | --- |
 | `6a1771225c8d10ffa1104d2d` | Completed | V1 дал `json_or_text_ok 15/16`, `exact_ok 11/16`. Ошибки: точная дата 1919, военная история, source-required RAG и ambiguous rename. |
+| `6a1773da5c8d10ffa1104d4f` | Completed | V2 дал `json_or_text_ok 16/16`, `exact_ok 14/16`. Остались ошибки: точная дата 17 февраля 1919 и полный RAG-запрос по переименованиям. |
 
 ## Критерий приемки
 
