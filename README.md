@@ -66,15 +66,15 @@ escalation-ladder   ██████████ 100%
 
 ### Wiki по стратегиям
 
-- [conditional-memory](docs/wiki/conditional-memory.md)
-- [sparse-escalation](docs/wiki/sparse-escalation.md)
-- [early-exit](docs/wiki/early-exit.md)
-- [strict-skill](docs/wiki/strict-skill.md)
-- [verify](docs/wiki/verify.md)
-- [council](docs/wiki/council.md)
-- [skill-router](docs/wiki/skill-router.md)
-- [memory-verified](docs/wiki/memory-verified.md)
-- [escalation-ladder](docs/wiki/escalation-ladder.md)
+- [conditional-memory](https://github.com/yasg1988/iola-small-model-lab/wiki/conditional-memory)
+- [sparse-escalation](https://github.com/yasg1988/iola-small-model-lab/wiki/sparse-escalation)
+- [early-exit](https://github.com/yasg1988/iola-small-model-lab/wiki/early-exit)
+- [strict-skill](https://github.com/yasg1988/iola-small-model-lab/wiki/strict-skill)
+- [verify](https://github.com/yasg1988/iola-small-model-lab/wiki/verify)
+- [council](https://github.com/yasg1988/iola-small-model-lab/wiki/council)
+- [skill-router](https://github.com/yasg1988/iola-small-model-lab/wiki/skill-router)
+- [memory-verified](https://github.com/yasg1988/iola-small-model-lab/wiki/memory-verified)
+- [escalation-ladder](https://github.com/yasg1988/iola-small-model-lab/wiki/escalation-ladder)
 
 ### Реальные модели Ollama
 
@@ -147,7 +147,7 @@ npm run summary:ollama
 
 ## Версия
 
-Текущая публичная версия: `v0.1.1`.
+Текущая публичная версия: `v0.1.2`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).
 
