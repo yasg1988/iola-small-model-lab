@@ -73,3 +73,12 @@ hf jobs cancel <JOB_ID>
 | `6a1760965c8d10ffa1104c1c` | Completed | V3 улучшил результат до `json_ok 30/30`, `exact_ok 21/30`. Остались провалы в ordinal school #1, missing entity clarify, private-data refuse, RAG query exact и officials. |
 | `6a1764135c8d10ffa1104c46` | Completed | V4 улучшил результат до `json_ok 30/30`, `exact_ok 24/30`. Остались 6 ошибок: ordinal school #1, salary/home-address refuse, source-required RAG and etymology direct answer. |
 | `6a1767a53a4b8cae6044cbd2` | Completed | V5 улучшил результат до `json_ok 30/30`, `exact_ok 29/30`. Единственная ошибка: salary/private-data refuse для директора школы №7. |
+| `6a176b205c8d10ffa1104cdd` | Completed | V6 дал `json_ok 30/30`, `exact_ok 28/30`, хуже V5. Итоговым кандидатом выбран V5. |
+
+## Итоговый кандидат
+
+Публичное имя:
+
+`LMSerg/iola-1b-2026-05-27`
+
+Это LoRA-адаптер для `google/gemma-3-1b-it`, основанный на лучшем V5-прогоне.
