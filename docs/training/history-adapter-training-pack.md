@@ -47,6 +47,7 @@ npm test
 | --- | --- | --- |
 | `6a1771225c8d10ffa1104d2d` | Completed | V1 дал `json_or_text_ok 15/16`, `exact_ok 11/16`. Ошибки: точная дата 1919, военная история, source-required RAG и ambiguous rename. |
 | `6a1773da5c8d10ffa1104d4f` | Completed | V2 дал `json_or_text_ok 16/16`, `exact_ok 14/16`. Остались ошибки: точная дата 17 февраля 1919 и полный RAG-запрос по переименованиям. |
+| `6a17769a5c8d10ffa1104d8f` | Completed | V3 дал `json_or_text_ok 16/16`, `exact_ok 15/16`. Итоговый кандидат опубликован как `LMSerg/iola-history-1b-2026-05-28`. |
 
 ## Критерий приемки
 

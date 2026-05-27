@@ -10,7 +10,7 @@
 | Проверка и консенсус | [strict-skill](https://github.com/yasg1988/iola-small-model-lab/wiki/strict-skill) · [verify](https://github.com/yasg1988/iola-small-model-lab/wiki/verify) · [council](https://github.com/yasg1988/iola-small-model-lab/wiki/council) |
 | Гибридные стратегии | [skill-router](https://github.com/yasg1988/iola-small-model-lab/wiki/skill-router) · [memory-verified](https://github.com/yasg1988/iola-small-model-lab/wiki/memory-verified) · [escalation-ladder](https://github.com/yasg1988/iola-small-model-lab/wiki/escalation-ladder) |
 | Подбор моделей | [итог исследования](docs/model-selection/research-conclusion-2026-05-27.md) · [профиль ПК](docs/model-selection/local-pc-profile-2026-05-27.md) · [план мастера iola](docs/model-selection/iola-cli-local-model-wizard-plan.md) · [MoE/Sparse](docs/model-selection/moe-sparse-models-research.md) |
-| Обучение моделей | [router contract](docs/training/router-tool-contract.md) · [router pack](docs/training/gemma3-router-training-pack.md) · [history adapter](docs/training/history-adapter-training-pack.md) · [IOLA 1B 2026-05-27](https://huggingface.co/LMSerg/iola-1b-2026-05-27) |
+| Обучение моделей | [router contract](docs/training/router-tool-contract.md) · [router pack](docs/training/gemma3-router-training-pack.md) · [history adapter](docs/training/history-adapter-training-pack.md) · [IOLA 1B 2026-05-27](https://huggingface.co/LMSerg/iola-1b-2026-05-27) · [IOLA History 1B 2026-05-28](https://huggingface.co/LMSerg/iola-history-1b-2026-05-28) |
 | Бенчмарки | [стратегии](benchmarks/2026-05-27-strategy-baseline.md) · [Ollama-модели](benchmarks/2026-05-27-ollama-node26.md) · [router baseline](benchmarks/2026-05-27-router-eval-baseline.md) |
 
 Исследовательская лаборатория маленьких локальных моделей на открытых данных Йошкар-Олы.
@@ -178,7 +178,7 @@ npm run validate:router
 
 ## Версия
 
-Текущая публичная версия: `v0.1.22`.
+Текущая публичная версия: `v0.1.23`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).
 

@@ -218,3 +218,14 @@
 Зафиксировано:
 
 - Второй history job `6a1773da5c8d10ffa1104d4f` дал `json_or_text_ok 16/16`, `exact_ok 14/16`.
+
+## v0.1.23 - 2026-05-28
+
+Добавлено:
+
+- Итоговый HF model repo `LMSerg/iola-history-1b-2026-05-28` для исторического LoRA-адаптера.
+- Model card с метриками V3: `json_or_text_ok 16/16`, `exact_ok 15/16`.
+
+Зафиксировано:
+
+- Третий history job `6a17769a5c8d10ffa1104d8f` выбран итоговым кандидатом.
