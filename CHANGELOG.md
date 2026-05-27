@@ -77,3 +77,10 @@
 
 - Контракт `router-tool-contract.md` для строгого JSON/tool-call выхода маленькой router-модели.
 - Стартовый eval-набор `router-eval-v1.jsonl` на 30 вопросов для проверки layer, field, inn, clarify/refuse, RAG/source-required, officials и adversarial-сценариев.
+
+## v0.1.8 - 2026-05-27
+
+Добавлено:
+
+- Скрипт `run-router-eval.js` для Ollama-прогона router-моделей в JSON-mode.
+- Router baseline по `gemma3:1b`, `qwen3:1.7b` и `batiai/gemma4-e2b:q4`; Gemma 4 E2B Q4 показала лучший сырой router-сигнал, но требует больше ресурсов.
