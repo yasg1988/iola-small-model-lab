@@ -68,7 +68,11 @@ npm test
 
 ## Первый прогон обучения
 
-До Hugging Face подготовлен локальный training pack. Следующий шаг - загрузить `router-train-v1.jsonl` как датасет и обучить LoRA-адаптер под `gemma3:1b`.
+Hugging Face dataset:
+
+`https://huggingface.co/datasets/LMSerg/iola-gemma3-router-sft`
+
+Следующий шаг - обучить LoRA-адаптер под `gemma3:1b` на `data/router-train-v1.jsonl`.
 
 После обучения проверяем не красивость ответа, а контракт:
 

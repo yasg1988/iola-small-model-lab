@@ -93,3 +93,11 @@
 - Раздельные train-файлы: `router-train-entities`, `router-train-safety`, `router-train-history`.
 - Генератор `generate-router-training.js`, который исключает точные пересечения с `router-eval-v1`.
 - Валидатор `validate-router-datasets.js` для строгого JSON/tool-call контракта, разрешенных tools/layers/fields и train/eval overlap.
+
+## v0.1.10 - 2026-05-27
+
+Добавлено:
+
+- Hugging Face dataset `LMSerg/iola-gemma3-router-sft` для обучения первого LoRA-адаптера `gemma3:1b`.
+- Dataset card для Hugging Face с описанием train/eval файлов и JSON/tool-call контракта.
+- Ссылка на HF dataset в README и документации training pack.
