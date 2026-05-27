@@ -10,7 +10,7 @@
 | Проверка и консенсус | [strict-skill](https://github.com/yasg1988/iola-small-model-lab/wiki/strict-skill) · [verify](https://github.com/yasg1988/iola-small-model-lab/wiki/verify) · [council](https://github.com/yasg1988/iola-small-model-lab/wiki/council) |
 | Гибридные стратегии | [skill-router](https://github.com/yasg1988/iola-small-model-lab/wiki/skill-router) · [memory-verified](https://github.com/yasg1988/iola-small-model-lab/wiki/memory-verified) · [escalation-ladder](https://github.com/yasg1988/iola-small-model-lab/wiki/escalation-ladder) |
 | Подбор моделей | [итог исследования](docs/model-selection/research-conclusion-2026-05-27.md) · [профиль ПК](docs/model-selection/local-pc-profile-2026-05-27.md) · [план мастера iola](docs/model-selection/iola-cli-local-model-wizard-plan.md) · [MoE/Sparse](docs/model-selection/moe-sparse-models-research.md) |
-| Обучение router-модели | [контракт tool-call](docs/training/router-tool-contract.md) · [training pack Gemma 3 1B](docs/training/gemma3-router-training-pack.md) · [HF dataset](https://huggingface.co/datasets/LMSerg/iola-gemma3-router-sft) · [LoRA job](docs/training/gemma3-router-lora-job.md) · [IOLA 1B 2026-05-27](https://huggingface.co/LMSerg/iola-1b-2026-05-27) |
+| Обучение моделей | [router contract](docs/training/router-tool-contract.md) · [router pack](docs/training/gemma3-router-training-pack.md) · [history adapter](docs/training/history-adapter-training-pack.md) · [IOLA 1B 2026-05-27](https://huggingface.co/LMSerg/iola-1b-2026-05-27) |
 | Бенчмарки | [стратегии](benchmarks/2026-05-27-strategy-baseline.md) · [Ollama-модели](benchmarks/2026-05-27-ollama-node26.md) · [router baseline](benchmarks/2026-05-27-router-eval-baseline.md) |
 
 Исследовательская лаборатория маленьких локальных моделей на открытых данных Йошкар-Олы.
@@ -138,11 +138,14 @@ MoE/Sparse-кандидаты и раннеры: [исследование MoE/S
 - `datasets/router-train-v5.jsonl` - V5 training pack с точечным усилением провалов V4.
 - `datasets/router-train-v6.jsonl` - V6 training pack с усилением salary/private-data отказов.
 - `datasets/city-history-stable-facts.jsonl` - стабильные исторические факты Йошкар-Олы для SFT и RAG-source режимов.
+- `datasets/history-train-v1.jsonl` - train-набор исторического адаптера: прямые стабильные ответы, source-required RAG и clarify.
+- `datasets/history-eval-v1.jsonl` - eval-набор исторического адаптера без точного пересечения с train.
 - `scripts/run-evaluation.js` - детерминированные базовые стратегии без LLM.
 - `scripts/run-ollama-evaluation.js` - реальные прогоны через локальный Ollama API.
 - `scripts/generate-router-training.js` - сборка router training pack без пересечения с eval-набором.
 - `scripts/validate-router-datasets.js` - проверка строгого JSON-контракта, разрешенных tools/layers/fields и train/eval overlap.
 - `training/train_gemma3_router_lora.py` - HF Jobs/UV скрипт для LoRA-обучения `google/gemma-3-1b-it`.
+- `training/train_gemma3_history_lora.py` - HF Jobs/UV скрипт для исторического LoRA-адаптера.
 - `results/latest-summary.json` - последняя сводка базового прогона.
 - `results/ollama-runs/latest-summary.json` - последняя Ollama-сводка, не коммитится.
 
@@ -173,7 +176,7 @@ npm run validate:router
 
 ## Версия
 
-Текущая публичная версия: `v0.1.19`.
+Текущая публичная версия: `v0.1.20`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).
 
