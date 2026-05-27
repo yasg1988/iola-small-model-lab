@@ -16,6 +16,8 @@
 | --- | ---: | --- |
 | `datasets/history-train-v1.jsonl` | 42 | Train SFT-набор для исторического адаптера. |
 | `datasets/history-eval-v1.jsonl` | 16 | Eval-набор без точного пересечения с train. |
+| `datasets/history-train-v2.jsonl` | 56 | V2-набор с усилением ошибок первого прогона. |
+| `datasets/history-eval-v2.jsonl` | 16 | V2 eval на той же поверхности. |
 
 ## Команды
 
@@ -36,6 +38,12 @@ npm test
 Планируемый adapter repo:
 
 `LMSerg/iola-history-1b-2026-05-28`
+
+## Журнал запусков
+
+| Job | Статус | Вывод |
+| --- | --- | --- |
+| `6a1771225c8d10ffa1104d2d` | Completed | V1 дал `json_or_text_ok 15/16`, `exact_ok 11/16`. Ошибки: точная дата 1919, военная история, source-required RAG и ambiguous rename. |
 
 ## Критерий приемки
 

@@ -296,5 +296,165 @@ evals.push(
 await writeJsonl("history-train-v1.jsonl", train);
 await writeJsonl("history-eval-v1.jsonl", evals);
 
+const trainV2 = [...train];
+const evalV2 = evals.map((item) => ({ ...item, dataset: "history-eval-v2" }));
+
+function pushV2({ id, type, topic, question, answer, tags = [] }) {
+  trainV2.push(
+    row({
+      id: `history-train-v2-${id}`,
+      dataset: "history-train-v2",
+      sourceId: "manual-history-v2",
+      type,
+      topic,
+      question,
+      answer,
+      tags: ["history", type, ...tags],
+    }),
+  );
+}
+
+[
+  [
+    "rename-1919-1",
+    "укажи точную дату переименования Царевококшайска в Краснококшайск",
+    "Царевококшайск был переименован в Краснококшайск 17 февраля 1919 года.",
+  ],
+  [
+    "rename-1919-2",
+    "когда именно Царевококшайск стал Краснококшайском",
+    "Точная дата переименования Царевококшайска в Краснококшайск - 17 февраля 1919 года.",
+  ],
+].forEach(([id, question, answer]) =>
+  pushV2({
+    id,
+    type: "direct_answer",
+    topic: "rename_1919",
+    question,
+    answer,
+    tags: ["old_names"],
+  }),
+);
+
+[
+  [
+    "war-1",
+    "какую роль сыграла война в развитии Йошкар-Олы",
+    "В годы Великой Отечественной войны в Йошкар-Олу эвакуировали ряд заводов. Это стало важным толчком для промышленного и социально-экономического развития города.",
+  ],
+  [
+    "war-2",
+    "почему Великая Отечественная война важна для истории Йошкар-Олы",
+    "Великая Отечественная война важна для истории Йошкар-Олы тем, что в город были эвакуированы заводы, что ускорило промышленное развитие.",
+  ],
+  [
+    "war-3",
+    "что происходило с промышленностью Йошкар-Олы во время войны",
+    "Во время Великой Отечественной войны в Йошкар-Олу эвакуировали предприятия и заводы, что усилило промышленное развитие города.",
+  ],
+].forEach(([id, question, answer]) =>
+  pushV2({
+    id,
+    type: "direct_answer",
+    topic: "war_industry",
+    question,
+    answer,
+    tags: ["war_industry"],
+  }),
+);
+
+[
+  [
+    "source-foundation-1",
+    "нужен источник по основанию Йошкар-Олы",
+    {
+      action: "tool_call",
+      tool: "rag_search",
+      args: {
+        query: "Йошкар-Ола основана 1584 источник",
+        collections: ["city_history", "official_documents"],
+      },
+    },
+  ],
+  [
+    "source-foundation-2",
+    "подтверди источником что Йошкар-Олу основали в 1584",
+    {
+      action: "tool_call",
+      tool: "rag_search",
+      args: {
+        query: "Йошкар-Ола основана 1584 источник",
+        collections: ["city_history", "official_documents"],
+      },
+    },
+  ],
+  [
+    "source-foundation-3",
+    "подбери источник по году основания города",
+    {
+      action: "tool_call",
+      tool: "rag_search",
+      args: {
+        query: "Йошкар-Ола основана 1584 источник",
+        collections: ["city_history", "official_documents"],
+      },
+    },
+  ],
+  [
+    "source-etymology-1",
+    "нужен источник о переводе названия Йошкар-Ола",
+    {
+      action: "tool_call",
+      tool: "rag_search",
+      args: {
+        query: "Йошкар-Ола йошкар красный ола город источник",
+        collections: ["city_history", "official_documents"],
+      },
+    },
+  ],
+  [
+    "source-etymology-2",
+    "найди источник что Йошкар-Ола означает Красный город",
+    {
+      action: "tool_call",
+      tool: "rag_search",
+      args: {
+        query: "Йошкар-Ола йошкар красный ола город источник",
+        collections: ["city_history", "official_documents"],
+      },
+    },
+  ],
+].forEach(([id, question, answer]) =>
+  pushV2({
+    id,
+    type: "source_required",
+    topic: "source_required",
+    question,
+    answer: assistantJson(answer),
+    tags: ["rag_search"],
+  }),
+);
+
+[
+  "когда было переименование города?",
+  "какое переименование города ты имеешь в виду?",
+  "когда город сменил название?",
+  "когда город переименовали без уточнения",
+].forEach((question, index) =>
+  pushV2({
+    id: `clarify-rename-${index + 1}`,
+    type: "clarify",
+    topic: "ambiguous_rename",
+    question,
+    answer: clarifyAnswer,
+    tags: ["clarify"],
+  }),
+);
+
+await writeJsonl("history-train-v2.jsonl", trainV2);
+await writeJsonl("history-eval-v2.jsonl", evalV2);
+
 console.log(`Generated history-train-v1.jsonl: ${train.length} rows`);
 console.log(`Generated history-eval-v1.jsonl: ${evals.length} rows`);
+console.log(`Generated history-train-v2.jsonl: ${trainV2.length} rows`);
+console.log(`Generated history-eval-v2.jsonl: ${evalV2.length} rows`);
