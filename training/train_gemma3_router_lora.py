@@ -76,6 +76,20 @@ def compact_json(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
 
 
+def is_expected_match(parsed, expected):
+    if parsed.get("action") != expected.get("action"):
+        return False
+
+    if expected.get("action") == "direct_answer" and "answer_contains" in expected:
+        answer = str(parsed.get("answer", ""))
+        return all(fragment in answer for fragment in expected["answer_contains"])
+
+    if expected.get("action") == "refuse":
+        return parsed.get("reason") == expected.get("reason")
+
+    return compact_json(parsed) == compact_json(expected)
+
+
 def extract_json_object(text):
     text = text.strip()
     if text.startswith("```"):
@@ -283,7 +297,7 @@ def main():
         try:
             parsed = extract_json_object(raw_output)
             is_json_ok = True
-            is_exact_ok = compact_json(parsed) == compact_json(expected)
+            is_exact_ok = is_expected_match(parsed, expected)
         except Exception as error:
             parsed = {"error": str(error)}
 

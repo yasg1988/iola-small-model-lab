@@ -24,6 +24,8 @@
 | `datasets/router-eval-v1.jsonl` | 30 | Отложенный eval-набор, не входит в train. |
 | `datasets/router-train-v2.jsonl` | 810 | V2 pack: модель возвращает `entity_number`, а не запоминает ИНН. |
 | `datasets/router-eval-v2.jsonl` | 30 | V2 eval с `resolve_entity_field`. |
+| `datasets/router-train-v3.jsonl` | 829 | V3 pack: V2 плюс усиление alias/search/clarify/refuse/RAG/officials. |
+| `datasets/router-eval-v3.jsonl` | 30 | V3 eval: alias-запросы ожидают `entity_name`, а не номер. |
 
 ## Формат
 

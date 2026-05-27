@@ -32,6 +32,8 @@ SFT-набор для первого LoRA-прогона маленькой rout
 | `data/router-eval-v1.jsonl` | 30 | Held-out eval set, not included in train. |
 | `data/router-train-v2.jsonl` | 810 | V2 train pack: model returns `entity_number/entity_name`; API resolves INN. |
 | `data/router-eval-v2.jsonl` | 30 | V2 held-out eval set. |
+| `data/router-train-v3.jsonl` | 829 | V3 train pack with extra alias/search/clarify/refuse/RAG/officials examples. |
+| `data/router-eval-v3.jsonl` | 30 | V3 held-out eval; alias queries expect `entity_name`. |
 
 ## Format
 

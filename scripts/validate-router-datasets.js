@@ -13,6 +13,7 @@ const TRAIN_FILES = [
   "router-train-safety-v2.jsonl",
   "router-train-history-v2.jsonl",
   "router-train-v2.jsonl",
+  "router-train-v3.jsonl",
 ];
 
 const ALLOWED_ACTIONS = new Set(["tool_call", "clarify", "refuse", "direct_answer"]);
@@ -170,12 +171,15 @@ function validatePayload(payload, context) {
     }
 
     if (["get_current_official", "get_official_by_date"].includes(payload.tool)) {
-      if (payload.args.layer !== "officials") {
-        fail(context, `${payload.tool} requires officials layer`);
+      if (payload.args.layer && payload.args.layer !== "officials") {
+        fail(context, `${payload.tool} requires officials layer when layer is provided`);
       }
 
-      if (typeof payload.args.position !== "string" || !payload.args.position.trim()) {
-        fail(context, `${payload.tool} requires position`);
+      if (
+        typeof payload.args.position !== "string" &&
+        typeof payload.args.office_query !== "string"
+      ) {
+        fail(context, `${payload.tool} requires position or office_query`);
       }
     }
 

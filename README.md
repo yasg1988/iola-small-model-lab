@@ -133,6 +133,7 @@ MoE/Sparse-кандидаты и раннеры: [исследование MoE/S
 - `datasets/router-eval-v1.jsonl` - стартовый eval-набор для проверки JSON/tool-call router-модели.
 - `datasets/router-train-v1.jsonl` - SFT training pack для `gemma3:1b`: маршрутизация по учреждениям, ловушки, clarify/refuse, исторические direct-answer и RAG-source режимы.
 - `datasets/router-train-v2.jsonl` - V2 training pack без запоминания ИНН: модель возвращает `entity_number/entity_name`, а ИНН резолвит API.
+- `datasets/router-train-v3.jsonl` - V3 training pack с усилением alias, search, clarify/refuse, RAG и officials.
 - `datasets/city-history-stable-facts.jsonl` - стабильные исторические факты Йошкар-Олы для SFT и RAG-source режимов.
 - `scripts/run-evaluation.js` - детерминированные базовые стратегии без LLM.
 - `scripts/run-ollama-evaluation.js` - реальные прогоны через локальный Ollama API.
@@ -169,7 +170,7 @@ npm run validate:router
 
 ## Версия
 
-Текущая публичная версия: `v0.1.14`.
+Текущая публичная версия: `v0.1.15`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).
 

@@ -134,3 +134,14 @@
 Зафиксировано:
 
 - Третий HF Jobs запуск `6a1757885c8d10ffa1104b6f` дал `json_ok 30/30`, но `exact_ok 1/30` на v1-контракте с ИНН. Гипотеза "зашить ИНН в 1B-модель" признана слабой.
+
+## v0.1.15 - 2026-05-27
+
+Добавлено:
+
+- V3 router train/eval с усиленными примерами для alias, `search_entities`, `clarify`, `refuse`, `rag_search` и `officials`.
+- V3 eval переводит alias-запросы на `entity_name`, чтобы API выполнял fuzzy resolve, а модель не угадывала номер учреждения.
+
+Исправлено:
+
+- HF eval теперь учитывает `answer_contains` для `direct_answer` и допускает краткий `refuse` по `reason`.

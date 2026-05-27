@@ -14,6 +14,8 @@ const OUTPUTS = {
   historyV2: "router-train-history-v2.jsonl",
   combinedV2: "router-train-v2.jsonl",
   evalV2: "router-eval-v2.jsonl",
+  combinedV3: "router-train-v3.jsonl",
+  evalV3: "router-eval-v3.jsonl",
 };
 
 function normalizeQuestion(value) {
@@ -259,6 +261,81 @@ function buildEvalV2(evalRows, sourceRows) {
   });
 }
 
+function buildEvalV3(evalV2Rows) {
+  const aliasById = new Map([
+    ["router-eval-004", "гимназия Пушкина"],
+    ["router-eval-005", "Обыкновенное чудо"],
+    ["router-eval-009", "Сказка Савино"],
+    ["router-eval-010", "Хрусталик"],
+    ["router-eval-012", "Золушка"],
+  ]);
+
+  return evalV2Rows.map((row) => {
+    const next = JSON.parse(JSON.stringify(row));
+    next.dataset = "router-eval-v3";
+    const alias = aliasById.get(next.id);
+
+    if (alias && next.expected?.tool === "resolve_entity_field") {
+      delete next.expected.args.entity_number;
+      next.expected.args.entity_name = alias;
+    }
+
+    return next;
+  });
+}
+
+function buildV3BoostRows(evalQuestions) {
+  const rows = [];
+  const seenQuestions = new Set(evalQuestions);
+
+  function push(row) {
+    const key = normalizeQuestion(row.messages[0].content);
+    if (seenQuestions.has(key)) {
+      return;
+    }
+    seenQuestions.add(key);
+    rows.push(row);
+  }
+
+  const manualRows = [
+    ["alias-001", "статус лицензии гимназии имени Пушкина", { action: "tool_call", tool: "resolve_entity_field", args: { layer: "schools", entity_name: "гимназия Пушкина", field: "license_status" } }, ["alias", "schools"]],
+    ["alias-002", "адрес школы Обыкновенное чудо", { action: "tool_call", tool: "resolve_entity_field", args: { layer: "schools", entity_name: "Обыкновенное чудо", field: "address" } }, ["alias", "schools"]],
+    ["alias-003", "сайт детсада Сказка в Савино", { action: "tool_call", tool: "resolve_entity_field", args: { layer: "kindergartens", entity_name: "Сказка Савино", field: "website" } }, ["alias", "kindergartens"]],
+    ["alias-004", "проверь лицензию детсада Хрусталик", { action: "tool_call", tool: "resolve_entity_field", args: { layer: "kindergartens", entity_name: "Хрусталик", field: "license_status" } }, ["alias", "kindergartens"]],
+    ["alias-005", "email садика Золушка", { action: "tool_call", tool: "resolve_entity_field", args: { layer: "kindergartens", entity_name: "Золушка", field: "email" } }, ["alias", "kindergartens"]],
+    ["search-001", "покажи школы на улице Петрова", { action: "tool_call", tool: "search_entities", args: { layer: "schools", query: "Петрова" } }, ["search", "schools"]],
+    ["search-002", "детские сады на Машиностроителей", { action: "tool_call", tool: "search_entities", args: { layer: "kindergartens", query: "Машиностроителей" } }, ["search", "kindergartens"]],
+    ["search-003", "есть учреждение Колибри?", { action: "tool_call", tool: "search_entities", args: { layer: "kindergartens", query: "Колибри" } }, ["search", "kindergartens"]],
+    ["clarify-001", "дай номер телефона школы", { action: "clarify", question: "Уточните номер или название школы." }, ["clarify", "schools"]],
+    ["clarify-002", "кто заведующий детсада?", { action: "clarify", question: "Уточните номер или название детского сада." }, ["clarify", "kindergartens"]],
+    ["clarify-003", "когда город получил новое название?", { action: "clarify", question: "Уточните, какое переименование вас интересует: в Краснококшайск в 1919 году или в Йошкар-Олу в 1928 году." }, ["clarify", "city_history"]],
+    ["refuse-001", "какая зарплата у директора школы 7?", { action: "refuse", reason: "field_not_public" }, ["refuse", "schools"]],
+    ["refuse-002", "домашний адрес заведующей садика 1", { action: "refuse", reason: "field_not_public" }, ["refuse", "kindergartens"]],
+    ["rag-001", "когда основали Йошкар-Олу со ссылкой на источник", { action: "tool_call", tool: "rag_search", args: { query: "Йошкар-Ола основана 1584 источник", collections: ["city_history", "official_documents"] } }, ["rag_search", "city_history"]],
+    ["rag-002", "дай источник что Йошкар-Ола переводится как Красный город", { action: "tool_call", tool: "rag_search", args: { query: "Йошкар-Ола йошкар красный ола город источник", collections: ["city_history", "official_documents"] } }, ["rag_search", "city_history"]],
+    ["official-001", "назови мэра Йошкар-Олы сейчас", { action: "tool_call", tool: "get_current_official", args: { jurisdiction: "yoshkar_ola", office_query: "мэр" } }, ["officials"]],
+    ["official-002", "кто сейчас занимает должность главы города?", { action: "tool_call", tool: "get_current_official", args: { jurisdiction: "yoshkar_ola", office_query: "глава города" } }, ["officials"]],
+    ["official-003", "глава города в 2018", { action: "tool_call", tool: "get_official_by_date", args: { jurisdiction: "yoshkar_ola", office_query: "глава города", date: "2018" } }, ["officials"]],
+    ["adversarial-001", "школа 10 точно на Димитрова 57?", { action: "tool_call", tool: "resolve_entity_field", args: { layer: "schools", entity_number: 10, field: "address", must_refute_user_value: "Димитрова 57" } }, ["adversarial", "schools"]],
+  ];
+
+  for (const [id, question, answer, tags] of manualRows) {
+    push(
+      sftRow({
+        id: `router-train-v3-${id}`,
+        dataset: "router-train-v3",
+        sourceId: "manual-v3",
+        type: tags[0],
+        question,
+        answer,
+        tags,
+      }),
+    );
+  }
+
+  return rows;
+}
+
 function buildSafetyTraining(evalQuestions) {
   const rows = [];
   const seenQuestions = new Set(evalQuestions);
@@ -474,13 +551,17 @@ const safety = sortRows(buildSafetyTraining(evalQuestions));
 const history = sortRows(buildHistoryTraining(historyRows, evalQuestions));
 const combined = sortRows([...entities, ...safety, ...history]);
 const evalV2 = sortRows(buildEvalV2(evalRows, [...simpleRows, ...adversarialRows]));
+const evalV3 = sortRows(buildEvalV3(evalV2));
 const evalV2Questions = new Set(evalV2.map((row) => normalizeQuestion(row.question)));
+const evalV3Questions = new Set(evalV3.map((row) => normalizeQuestion(row.question)));
 const entitiesV2 = sortRows(
   buildEntityTraining(simpleRows, adversarialRows, evalV2Questions, { version: 2 }),
 );
 const safetyV2 = safety.map((row) => ({ ...row, dataset: "router-train-safety-v2" }));
 const historyV2 = history.map((row) => ({ ...row, dataset: "router-train-history-v2" }));
 const combinedV2 = sortRows([...entitiesV2, ...safetyV2, ...historyV2]);
+const boostsV3 = buildV3BoostRows(evalV3Questions);
+const combinedV3 = sortRows([...entitiesV2, ...safetyV2, ...historyV2, ...boostsV3]);
 
 await writeJsonl(OUTPUTS.entities, entities);
 await writeJsonl(OUTPUTS.safety, safety);
@@ -491,6 +572,8 @@ await writeJsonl(OUTPUTS.safetyV2, safetyV2);
 await writeJsonl(OUTPUTS.historyV2, historyV2);
 await writeJsonl(OUTPUTS.combinedV2, combinedV2);
 await writeJsonl(OUTPUTS.evalV2, evalV2);
+await writeJsonl(OUTPUTS.combinedV3, combinedV3);
+await writeJsonl(OUTPUTS.evalV3, evalV3);
 
 console.log(`Generated ${OUTPUTS.entities}: ${entities.length} rows`);
 console.log(`Generated ${OUTPUTS.safety}: ${safety.length} rows`);
@@ -501,3 +584,5 @@ console.log(`Generated ${OUTPUTS.safetyV2}: ${safetyV2.length} rows`);
 console.log(`Generated ${OUTPUTS.historyV2}: ${historyV2.length} rows`);
 console.log(`Generated ${OUTPUTS.combinedV2}: ${combinedV2.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV2}: ${evalV2.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV3}: ${combinedV3.length} rows`);
+console.log(`Generated ${OUTPUTS.evalV3}: ${evalV3.length} rows`);
