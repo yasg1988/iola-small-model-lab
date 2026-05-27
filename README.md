@@ -2,6 +2,16 @@
 
 ![Исследовательская витрина малых ИИ-моделей Йошкар-Олы](assets/research-showcase.png)
 
+## Wiki
+
+| Раздел | Страницы |
+| --- | --- |
+| Архитектурные стратегии | [conditional-memory](https://github.com/yasg1988/iola-small-model-lab/wiki/conditional-memory) · [sparse-escalation](https://github.com/yasg1988/iola-small-model-lab/wiki/sparse-escalation) · [early-exit](https://github.com/yasg1988/iola-small-model-lab/wiki/early-exit) |
+| Проверка и консенсус | [strict-skill](https://github.com/yasg1988/iola-small-model-lab/wiki/strict-skill) · [verify](https://github.com/yasg1988/iola-small-model-lab/wiki/verify) · [council](https://github.com/yasg1988/iola-small-model-lab/wiki/council) |
+| Гибридные стратегии | [skill-router](https://github.com/yasg1988/iola-small-model-lab/wiki/skill-router) · [memory-verified](https://github.com/yasg1988/iola-small-model-lab/wiki/memory-verified) · [escalation-ladder](https://github.com/yasg1988/iola-small-model-lab/wiki/escalation-ladder) |
+| Подбор моделей | [профиль ПК](docs/model-selection/local-pc-profile-2026-05-27.md) · [план мастера iola](docs/model-selection/iola-cli-local-model-wizard-plan.md) · [MoE/Sparse](docs/model-selection/moe-sparse-models-research.md) |
+| Бенчмарки | [стратегии](benchmarks/2026-05-27-strategy-baseline.md) · [Ollama-модели](benchmarks/2026-05-27-ollama-node26.md) |
+
 Исследовательская лаборатория маленьких локальных моделей на открытых данных Йошкар-Олы.
 
 Цель: сравнить, где маленькой модели достаточно прямого ответа, а где нужен внешний факт из API/MCP, строгая проверка или эскалация.
@@ -147,7 +157,7 @@ npm run summary:ollama
 
 ## Версия
 
-Текущая публичная версия: `v0.1.2`.
+Текущая публичная версия: `v0.1.3`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).
 
