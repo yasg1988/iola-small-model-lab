@@ -1,0 +1,31 @@
+{
+  "name": "iola-small-model-lab",
+  "version": "0.1.0",
+  "description": "Исследовательская лаборатория маленьких локальных моделей на открытых данных Йошкар-Олы.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "iola-model-lab": "bin/iola-model-lab.js"
+  },
+  "scripts": {
+    "models": "node bin/iola-model-lab.js models",
+    "pull": "node bin/iola-model-lab.js pull",
+    "generate": "node bin/iola-model-lab.js generate",
+    "run:baseline": "node bin/iola-model-lab.js run-baseline",
+    "run:ollama": "node bin/iola-model-lab.js run-ollama",
+    "summary": "node bin/iola-model-lab.js summary",
+    "summary:ollama": "node bin/iola-model-lab.js summary-ollama",
+    "test": "node --check bin/iola-model-lab.js && node --check lib/common.js && node --check lib/concepts.js && node --check lib/ollama.js && node --check lib/prompts.js && node --check scripts/generate-datasets.js && node --check scripts/run-evaluation.js && node --check scripts/run-ollama-evaluation.js && node --check scripts/summarize-results.js && node --check scripts/summarize-ollama-results.js"
+  },
+  "keywords": [
+    "yoshkar-ola",
+    "ollama",
+    "small-models",
+    "rag",
+    "mcp",
+    "benchmark"
+  ],
+  "engines": {
+    "node": ">=26.0.0"
+  }
+}
