@@ -8,29 +8,29 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
 const COMMANDS = new Map([
-  ['generate', { script: 'scripts/generate-datasets.js', description: 'Generate JSONL datasets from the public API.' }],
-  ['run-baseline', { script: 'scripts/run-evaluation.js', description: 'Run deterministic strategy baselines.' }],
-  ['run-ollama', { script: 'scripts/run-ollama-evaluation.js', description: 'Run real Ollama model evaluation.' }],
-  ['summary', { script: 'scripts/summarize-results.js', description: 'Print the latest baseline summary table.' }],
-  ['summary-ollama', { script: 'scripts/summarize-ollama-results.js', description: 'Print the latest Ollama summary table.' }],
+  ['generate', { script: 'scripts/generate-datasets.js', description: 'Создать JSONL-датасеты из публичного API.' }],
+  ['run-baseline', { script: 'scripts/run-evaluation.js', description: 'Запустить детерминированные базовые стратегии.' }],
+  ['run-ollama', { script: 'scripts/run-ollama-evaluation.js', description: 'Запустить оценку реальных моделей Ollama.' }],
+  ['summary', { script: 'scripts/summarize-results.js', description: 'Показать последнюю сводку базового прогона.' }],
+  ['summary-ollama', { script: 'scripts/summarize-ollama-results.js', description: 'Показать последнюю сводку Ollama-прогона.' }],
 ]);
 
 function help() {
   console.log(`iola-model-lab
 
-Usage:
+Использование:
   iola-model-lab <command> [options]
 
-Commands:
-  models          List locally available Ollama models
-  pull            Pull default or selected Ollama models
-  generate        Generate datasets
-  run-baseline    Run deterministic baseline concepts
-  run-ollama      Run real Ollama models
-  summary         Print latest baseline summary
-  summary-ollama  Print latest Ollama summary
+Команды:
+  models          Показать локально доступные модели Ollama
+  pull            Скачать модели Ollama по умолчанию или из --models
+  generate        Создать датасеты
+  run-baseline    Запустить детерминированные базовые концепции
+  run-ollama      Запустить реальные модели Ollama
+  summary         Показать последнюю сводку базового прогона
+  summary-ollama  Показать последнюю сводку Ollama-прогона
 
-Examples:
+Примеры:
   iola-model-lab pull --models qwen3:0.6b
   iola-model-lab run-ollama --models qwen3:0.6b --modes mcp-context,verified-context --dataset simple-facts --limit 5
   iola-model-lab run-baseline --all
@@ -61,7 +61,7 @@ async function runNodeScript(script, args) {
 async function listLocalModels() {
   const models = await listModels();
   if (!models.length) {
-    console.log('Ollama is reachable, but no models are installed.');
+    console.log('Ollama доступен, но модели не установлены.');
     return;
   }
   for (const model of models) {
@@ -72,9 +72,9 @@ async function listLocalModels() {
 
 async function pullModels(args) {
   for (const model of selectedModels(args)) {
-    console.log(`Pulling ${model}...`);
+    console.log(`Скачиваю ${model}...`);
     await pullModel(model);
-    console.log(`Pulled ${model}`);
+    console.log(`Скачано ${model}`);
   }
 }
 
@@ -97,7 +97,7 @@ async function main() {
 
   const entry = COMMANDS.get(command);
   if (!entry) {
-    console.error(`Unknown command: ${command}`);
+    console.error(`Неизвестная команда: ${command}`);
     help();
     process.exit(1);
   }

@@ -10,9 +10,9 @@ const summary = JSON.parse(await fs.readFile(SUMMARY_FILE, 'utf8'));
 const rows = Object.values(summary.concepts)
   .sort((a, b) => a.dataset.localeCompare(b.dataset) || b.accuracy - a.accuracy || a.concept.localeCompare(b.concept));
 
-console.log(`Run: ${summary.runId}`);
+console.log(`Прогон: ${summary.runId}`);
 console.log('');
-console.log('| Dataset | Block | Concept | Correct | Accuracy | Answer rate | Escalated | Clarify | Avg ms |');
+console.log('| Датасет | Блок | Концепция | Верно | Точность | Доля ответов | Эскалаций | Уточнений | Среднее, мс |');
 console.log('| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |');
 for (const row of rows) {
   console.log(`| ${row.dataset} | ${row.block} | ${row.concept} | ${row.correct}/${row.total} | ${(row.accuracy * 100).toFixed(1)}% | ${(row.answerRate * 100).toFixed(1)}% | ${row.escalated} | ${row.needsClarification} | ${row.avgLatencyMs} |`);

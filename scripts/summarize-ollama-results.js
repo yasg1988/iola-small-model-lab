@@ -13,10 +13,10 @@ const rows = Object.values(summary.results)
     || a.model.localeCompare(b.model)
     || a.mode.localeCompare(b.mode));
 
-console.log(`Run: ${summary.runId}`);
-console.log(`Limit: ${summary.limit ?? 'all'}`);
+console.log(`Прогон: ${summary.runId}`);
+console.log(`Лимит: ${summary.limit ?? 'все'}`);
 console.log('');
-console.log('| Dataset | Model | Mode | Correct | Accuracy | Has expected | False affirmed | Avg ms |');
+console.log('| Датасет | Модель | Режим | Верно | Точность | Есть ожидаемое | Подтвердила ложное | Среднее, мс |');
 console.log('| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |');
 for (const row of rows) {
   console.log(`| ${row.dataset} | ${row.model} | ${row.mode} | ${row.correct}/${row.total} | ${(row.accuracy * 100).toFixed(1)}% | ${row.hasExpected}/${row.total} | ${row.affirmsFalse} | ${Math.round(row.avgLatencyMs)} |`);
