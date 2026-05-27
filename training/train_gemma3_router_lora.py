@@ -84,10 +84,34 @@ def extract_json_object(text):
             text = text[4:].strip()
 
     start = text.find("{")
-    end = text.rfind("}")
-    if start < 0 or end < start:
+    if start < 0:
         raise ValueError("no JSON object found")
-    return json.loads(text[start : end + 1])
+
+    depth = 0
+    in_string = False
+    escaped = False
+    for index in range(start, len(text)):
+        char = text[index]
+
+        if in_string:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                in_string = False
+            continue
+
+        if char == '"':
+            in_string = True
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return json.loads(text[start : index + 1])
+
+    raise ValueError("unterminated JSON object")
 
 
 @dataclass
@@ -165,14 +189,25 @@ def main():
     )
 
     def tokenize_row(row):
+        prompt_text = format_chat(tokenizer, row["messages"][:1], add_generation_prompt=True)
         text = format_chat(tokenizer, row["messages"], add_generation_prompt=False)
+        if tokenizer.eos_token and not text.endswith(tokenizer.eos_token):
+            text += tokenizer.eos_token
+
+        prompt_ids = tokenizer(
+            prompt_text,
+            max_length=args.max_seq_length,
+            truncation=True,
+            add_special_tokens=False,
+        )["input_ids"]
         encoded = tokenizer(
             text,
             max_length=args.max_seq_length,
             truncation=True,
             add_special_tokens=False,
         )
-        encoded["labels"] = encoded["input_ids"].copy()
+        prompt_len = min(len(prompt_ids), len(encoded["input_ids"]))
+        encoded["labels"] = [-100] * prompt_len + encoded["input_ids"][prompt_len:]
         return encoded
 
     train_dataset = train_dataset.map(

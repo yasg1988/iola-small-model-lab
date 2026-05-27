@@ -115,3 +115,11 @@
 Исправлено:
 
 - Первый HF Jobs запуск LoRA упал на backward из-за `gradient_checkpointing` с LoRA. Для короткого T4-прогона checkpointing отключен в training script.
+
+## v0.1.13 - 2026-05-27
+
+Исправлено:
+
+- Второй HF Jobs запуск технически завершился, но не улучшил exact-match: модель повторяла JSON и не выучила стабильную маршрутизацию ИНН.
+- Training script теперь маскирует user prompt и считает loss только по assistant JSON.
+- Eval parser считает первый сбалансированный JSON-объект, а не весь хвост генерации.

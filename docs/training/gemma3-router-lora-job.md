@@ -67,3 +67,4 @@ hf jobs cancel <JOB_ID>
 | Job | Статус | Вывод |
 | --- | --- | --- |
 | `6a1753683a4b8cae6044cb3d` | Error | Первый запуск дошел до загрузки модели и train-набора, но упал на backward из-за `gradient_checkpointing` с LoRA: `element 0 of tensors does not require grad`. Для следующего запуска checkpointing отключен. |
+| `6a1753cb3a4b8cae6044cb43` | Completed | Технически успешно обучил и загрузил адаптер, но eval слабый: строгий JSON `0/30`, first-balanced JSON `29/30`, exact `2/30`. Причина: модель повторяет JSON и часто подставляет один и тот же ИНН. Следующий запуск обучает loss только на assistant JSON. |
