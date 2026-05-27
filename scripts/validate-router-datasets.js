@@ -9,11 +9,16 @@ const TRAIN_FILES = [
   "router-train-safety.jsonl",
   "router-train-history.jsonl",
   "router-train-v1.jsonl",
+  "router-train-entities-v2.jsonl",
+  "router-train-safety-v2.jsonl",
+  "router-train-history-v2.jsonl",
+  "router-train-v2.jsonl",
 ];
 
 const ALLOWED_ACTIONS = new Set(["tool_call", "clarify", "refuse", "direct_answer"]);
 const ALLOWED_TOOLS = new Set([
   "get_entity_field",
+  "resolve_entity_field",
   "search_entities",
   "rag_search",
   "get_current_official",
@@ -116,6 +121,23 @@ function validatePayload(payload, context) {
 
       if (!/^\d{10}$/.test(String(payload.args.inn ?? ""))) {
         fail(context, "get_entity_field requires 10-digit inn");
+      }
+
+      if (!ALLOWED_ENTITY_FIELDS.has(payload.args.field)) {
+        fail(context, `unknown entity field ${payload.args.field}`);
+      }
+    }
+
+    if (payload.tool === "resolve_entity_field") {
+      if (!["schools", "kindergartens"].includes(payload.args.layer)) {
+        fail(context, "resolve_entity_field requires schools or kindergartens layer");
+      }
+
+      if (
+        typeof payload.args.entity_number !== "number" &&
+        (typeof payload.args.entity_name !== "string" || !payload.args.entity_name.trim())
+      ) {
+        fail(context, "resolve_entity_field requires entity_number or entity_name");
       }
 
       if (!ALLOWED_ENTITY_FIELDS.has(payload.args.field)) {
@@ -230,6 +252,27 @@ const componentIds = new Set(
 
 if (combined.length !== componentIds.size) {
   fail("router-train-v1.jsonl", "combined row count does not match component files");
+}
+
+const combinedV2 = allTrainRowsByFile.get("router-train-v2.jsonl");
+const componentV2Ids = new Set(
+  [
+    "router-train-entities-v2.jsonl",
+    "router-train-safety-v2.jsonl",
+    "router-train-history-v2.jsonl",
+  ]
+    .flatMap((fileName) => allTrainRowsByFile.get(fileName))
+    .map((row) => row.id),
+);
+
+if (combinedV2.length !== componentV2Ids.size) {
+  fail("router-train-v2.jsonl", "combined row count does not match component files");
+}
+
+for (const row of combinedV2) {
+  if (!componentV2Ids.has(row.id)) {
+    fail("router-train-v2.jsonl", `combined contains unknown component id ${row.id}`);
+  }
 }
 
 for (const row of combined) {

@@ -123,3 +123,14 @@
 - Второй HF Jobs запуск технически завершился, но не улучшил exact-match: модель повторяла JSON и не выучила стабильную маршрутизацию ИНН.
 - Training script теперь маскирует user prompt и считает loss только по assistant JSON.
 - Eval parser считает первый сбалансированный JSON-объект, а не весь хвост генерации.
+
+## v0.1.14 - 2026-05-27
+
+Добавлено:
+
+- V2 router contract `resolve_entity_field`: модель возвращает `layer + entity_number/entity_name + field`, а ИНН резолвит API.
+- V2 train/eval файлы: `router-train-v2.jsonl`, `router-eval-v2.jsonl` и раздельные компоненты.
+
+Зафиксировано:
+
+- Третий HF Jobs запуск `6a1757885c8d10ffa1104b6f` дал `json_ok 30/30`, но `exact_ok 1/30` на v1-контракте с ИНН. Гипотеза "зашить ИНН в 1B-модель" признана слабой.

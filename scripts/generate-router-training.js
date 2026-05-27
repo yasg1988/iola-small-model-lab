@@ -9,6 +9,11 @@ const OUTPUTS = {
   safety: "router-train-safety.jsonl",
   history: "router-train-history.jsonl",
   combined: "router-train-v1.jsonl",
+  entitiesV2: "router-train-entities-v2.jsonl",
+  safetyV2: "router-train-safety-v2.jsonl",
+  historyV2: "router-train-history-v2.jsonl",
+  combinedV2: "router-train-v2.jsonl",
+  evalV2: "router-eval-v2.jsonl",
 };
 
 function normalizeQuestion(value) {
@@ -63,6 +68,19 @@ function entityToolCall(row, extraArgs = {}) {
     args: {
       layer: row.layer,
       inn: row.expectedInn,
+      field: row.field,
+      ...extraArgs,
+    },
+  };
+}
+
+function entityToolCallV2(row, extraArgs = {}) {
+  return {
+    action: "tool_call",
+    tool: "resolve_entity_field",
+    args: {
+      layer: row.layer,
+      entity_number: row.entityNumber,
       field: row.field,
       ...extraArgs,
     },
@@ -135,9 +153,11 @@ function renderTemplate(template, row) {
   return template.replaceAll("{number}", String(row.entityNumber));
 }
 
-function buildEntityTraining(simpleRows, adversarialRows, evalQuestions) {
+function buildEntityTraining(simpleRows, adversarialRows, evalQuestions, { version = 1 } = {}) {
   const rows = [];
   const seenQuestions = new Set(evalQuestions);
+  const toolCall = version === 2 ? entityToolCallV2 : entityToolCall;
+  const suffix = version === 2 ? "-v2" : "";
 
   function push(row) {
     const key = normalizeQuestion(row.messages[0].content);
@@ -161,11 +181,11 @@ function buildEntityTraining(simpleRows, adversarialRows, evalQuestions) {
       push(
         sftRow({
           id: `router-train-entity-${source.id}-${String(index + 1).padStart(2, "0")}`,
-          dataset: "router-train-entities",
+          dataset: `router-train-entities${suffix}`,
           sourceId: source.id,
           type: "entity_field",
           question,
-          answer: entityToolCall(source),
+          answer: toolCall(source),
           tags: ["entity_field", source.layer, source.field, ...source.tags],
         }),
       );
@@ -184,11 +204,11 @@ function buildEntityTraining(simpleRows, adversarialRows, evalQuestions) {
       push(
         sftRow({
           id: `router-train-adversarial-${source.id}-${String(index + 1).padStart(2, "0")}`,
-          dataset: "router-train-entities",
+          dataset: `router-train-entities${suffix}`,
           sourceId: source.id,
           type: "adversarial_fact",
           question,
-          answer: entityToolCall(source, {
+          answer: toolCall(source, {
             must_refute_user_value: source.falseValue,
           }),
           tags: ["adversarial", source.layer, source.field, ...source.tags],
@@ -198,6 +218,45 @@ function buildEntityTraining(simpleRows, adversarialRows, evalQuestions) {
   }
 
   return rows;
+}
+
+function buildEvalV2(evalRows, sourceRows) {
+  const byInn = new Map(sourceRows.map((row) => [row.expectedInn, row]));
+
+  return evalRows.map((row) => {
+    const next = JSON.parse(JSON.stringify(row));
+    next.dataset = "router-eval-v2";
+
+    if (next.expected?.tool === "get_entity_field" && next.expected?.args?.inn) {
+      const source = byInn.get(next.expected.args.inn);
+      if (!source) {
+        throw new Error(`No entity source for eval ${next.id} inn ${next.expected.args.inn}`);
+      }
+
+      next.expected = {
+        action: "tool_call",
+        tool: "resolve_entity_field",
+        args: {
+          layer: next.expected.args.layer,
+          entity_number: source.entityNumber,
+          field: next.expected.args.field,
+        },
+      };
+
+      if (row.expected.must_refute_user_value) {
+        next.expected.args.must_refute_user_value = row.expected.must_refute_user_value;
+      }
+    }
+
+    if (next.expected?.tool === "search_entities" && next.expected?.args?.filters) {
+      const filters = next.expected.args.filters;
+      next.expected.args.query =
+        filters.address_contains ?? filters.name_contains ?? JSON.stringify(filters);
+      delete next.expected.args.filters;
+    }
+
+    return next;
+  });
 }
 
 function buildSafetyTraining(evalQuestions) {
@@ -414,13 +473,31 @@ const entities = sortRows(buildEntityTraining(simpleRows, adversarialRows, evalQ
 const safety = sortRows(buildSafetyTraining(evalQuestions));
 const history = sortRows(buildHistoryTraining(historyRows, evalQuestions));
 const combined = sortRows([...entities, ...safety, ...history]);
+const evalV2 = sortRows(buildEvalV2(evalRows, [...simpleRows, ...adversarialRows]));
+const evalV2Questions = new Set(evalV2.map((row) => normalizeQuestion(row.question)));
+const entitiesV2 = sortRows(
+  buildEntityTraining(simpleRows, adversarialRows, evalV2Questions, { version: 2 }),
+);
+const safetyV2 = safety.map((row) => ({ ...row, dataset: "router-train-safety-v2" }));
+const historyV2 = history.map((row) => ({ ...row, dataset: "router-train-history-v2" }));
+const combinedV2 = sortRows([...entitiesV2, ...safetyV2, ...historyV2]);
 
 await writeJsonl(OUTPUTS.entities, entities);
 await writeJsonl(OUTPUTS.safety, safety);
 await writeJsonl(OUTPUTS.history, history);
 await writeJsonl(OUTPUTS.combined, combined);
+await writeJsonl(OUTPUTS.entitiesV2, entitiesV2);
+await writeJsonl(OUTPUTS.safetyV2, safetyV2);
+await writeJsonl(OUTPUTS.historyV2, historyV2);
+await writeJsonl(OUTPUTS.combinedV2, combinedV2);
+await writeJsonl(OUTPUTS.evalV2, evalV2);
 
 console.log(`Generated ${OUTPUTS.entities}: ${entities.length} rows`);
 console.log(`Generated ${OUTPUTS.safety}: ${safety.length} rows`);
 console.log(`Generated ${OUTPUTS.history}: ${history.length} rows`);
 console.log(`Generated ${OUTPUTS.combined}: ${combined.length} rows`);
+console.log(`Generated ${OUTPUTS.entitiesV2}: ${entitiesV2.length} rows`);
+console.log(`Generated ${OUTPUTS.safetyV2}: ${safetyV2.length} rows`);
+console.log(`Generated ${OUTPUTS.historyV2}: ${historyV2.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV2}: ${combinedV2.length} rows`);
+console.log(`Generated ${OUTPUTS.evalV2}: ${evalV2.length} rows`);

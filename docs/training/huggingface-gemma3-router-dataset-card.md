@@ -30,6 +30,8 @@ SFT-набор для первого LoRA-прогона маленькой rout
 | `data/router-train-safety.jsonl` | 8 | Clarify, refuse, entity search, officials, RAG examples. |
 | `data/router-train-history.jsonl` | 20 | Stable city history direct-answer and source-required examples. |
 | `data/router-eval-v1.jsonl` | 30 | Held-out eval set, not included in train. |
+| `data/router-train-v2.jsonl` | 810 | V2 train pack: model returns `entity_number/entity_name`; API resolves INN. |
+| `data/router-eval-v2.jsonl` | 30 | V2 held-out eval set. |
 
 ## Format
 
@@ -56,6 +58,20 @@ Each row is JSONL with two chat messages:
 ```
 
 For schools and kindergartens, assistant messages do not contain final facts such as phone numbers, addresses, websites, or head names. They contain only routing decisions.
+
+V2 avoids forcing the 1B model to memorize arbitrary INNs:
+
+```json
+{
+  "action": "tool_call",
+  "tool": "resolve_entity_field",
+  "args": {
+    "layer": "schools",
+    "entity_number": 2,
+    "field": "phone"
+  }
+}
+```
 
 ## Contract
 
