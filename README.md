@@ -10,6 +10,7 @@
 | Проверка и консенсус | [strict-skill](https://github.com/yasg1988/iola-small-model-lab/wiki/strict-skill) · [verify](https://github.com/yasg1988/iola-small-model-lab/wiki/verify) · [council](https://github.com/yasg1988/iola-small-model-lab/wiki/council) |
 | Гибридные стратегии | [skill-router](https://github.com/yasg1988/iola-small-model-lab/wiki/skill-router) · [memory-verified](https://github.com/yasg1988/iola-small-model-lab/wiki/memory-verified) · [escalation-ladder](https://github.com/yasg1988/iola-small-model-lab/wiki/escalation-ladder) |
 | Подбор моделей | [итог исследования](docs/model-selection/research-conclusion-2026-05-27.md) · [профиль ПК](docs/model-selection/local-pc-profile-2026-05-27.md) · [план мастера iola](docs/model-selection/iola-cli-local-model-wizard-plan.md) · [MoE/Sparse](docs/model-selection/moe-sparse-models-research.md) |
+| Обучение router-модели | [контракт tool-call](docs/training/router-tool-contract.md) |
 | Бенчмарки | [стратегии](benchmarks/2026-05-27-strategy-baseline.md) · [Ollama-модели](benchmarks/2026-05-27-ollama-node26.md) |
 
 Исследовательская лаборатория маленьких локальных моделей на открытых данных Йошкар-Олы.
@@ -129,6 +130,8 @@ MoE/Sparse-кандидаты и раннеры: [исследование MoE/S
 
 - `datasets/simple-facts.jsonl` - 100 обычных вопросов по школам и детским садам.
 - `datasets/adversarial-facts.jsonl` - 100 вопросов с ложными предпосылками.
+- `datasets/router-eval-v1.jsonl` - стартовый eval-набор для проверки JSON/tool-call router-модели.
+- `datasets/city-history-stable-facts.jsonl` - стабильные исторические факты Йошкар-Олы для SFT и RAG-source режимов.
 - `scripts/run-evaluation.js` - детерминированные базовые стратегии без LLM.
 - `scripts/run-ollama-evaluation.js` - реальные прогоны через локальный Ollama API.
 - `results/latest-summary.json` - последняя сводка базового прогона.
