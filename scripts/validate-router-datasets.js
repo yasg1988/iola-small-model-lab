@@ -14,6 +14,7 @@ const TRAIN_FILES = [
   "router-train-history-v2.jsonl",
   "router-train-v2.jsonl",
   "router-train-v3.jsonl",
+  "router-train-v4.jsonl",
 ];
 
 const ALLOWED_ACTIONS = new Set(["tool_call", "clarify", "refuse", "direct_answer"]);

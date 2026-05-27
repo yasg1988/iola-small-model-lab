@@ -16,6 +16,8 @@ const OUTPUTS = {
   evalV2: "router-eval-v2.jsonl",
   combinedV3: "router-train-v3.jsonl",
   evalV3: "router-eval-v3.jsonl",
+  combinedV4: "router-train-v4.jsonl",
+  evalV4: "router-eval-v4.jsonl",
 };
 
 function normalizeQuestion(value) {
@@ -336,6 +338,149 @@ function buildV3BoostRows(evalQuestions) {
   return rows;
 }
 
+function buildV4BoostRows(evalQuestions) {
+  const rows = [];
+  const seenQuestions = new Set(evalQuestions);
+
+  function push(id, question, answer, tags) {
+    const key = normalizeQuestion(question);
+    if (seenQuestions.has(key)) {
+      return;
+    }
+    seenQuestions.add(key);
+    rows.push(
+      sftRow({
+        id: `router-train-v4-${id}`,
+        dataset: "router-train-v4",
+        sourceId: "manual-v4",
+        type: tags[0],
+        question,
+        answer,
+        tags,
+      }),
+    );
+  }
+
+  const schoolClarify = { action: "clarify", question: "Уточните номер или название школы." };
+  const kinderClarify = {
+    action: "clarify",
+    question: "Уточните номер или название детского сада.",
+  };
+  const renameClarify = {
+    action: "clarify",
+    question:
+      "Уточните, какое переименование вас интересует: в Краснококшайск в 1919 году или в Йошкар-Олу в 1928 году.",
+  };
+  const refuse = { action: "refuse", reason: "field_not_public" };
+
+  [
+    "директор первой школы кто",
+    "кто руководит школой первой",
+    "руководитель школы номер 1",
+  ].forEach((question, index) =>
+    push(
+      `school-one-${index + 1}`,
+      question,
+      {
+        action: "tool_call",
+        tool: "resolve_entity_field",
+        args: { layer: "schools", entity_number: 1, field: "head" },
+      },
+      ["entity_field", "schools", "ordinal"],
+    ),
+  );
+
+  [
+    "телефон школы пожалуйста",
+    "нужен телефон школы но номер не знаю",
+    "дай контакты школы",
+    "как позвонить в школу?",
+  ].forEach((question, index) => push(`clarify-school-${index + 1}`, question, schoolClarify, ["clarify", "schools"]));
+
+  [
+    "кто заведующая детского сада",
+    "нужен заведующий садика без номера",
+    "дай руководителя детского сада",
+    "кто главный в садике?",
+  ].forEach((question, index) =>
+    push(`clarify-kinder-${index + 1}`, question, kinderClarify, ["clarify", "kindergartens"]),
+  );
+
+  [
+    "когда город сменил название",
+    "когда было переименование города",
+    "в каком году переименовали Йошкар-Олу",
+  ].forEach((question, index) =>
+    push(`clarify-history-${index + 1}`, question, renameClarify, ["clarify", "city_history"]),
+  );
+
+  [
+    "зарплата директора школы 7",
+    "сколько платят директору школы номер 7",
+    "доход директора школы 7",
+    "покажи зарплату руководителя школы",
+    "домашний адрес заведующей садика 1",
+    "где живет заведующая детского сада 1",
+    "личный адрес руководителя детсада",
+    "паспортные данные заведующей детского сада",
+  ].forEach((question, index) => push(`refuse-${index + 1}`, question, refuse, ["refuse", "private_data"]));
+
+  [
+    [
+      "official-current-mayor-1",
+      "действующий мэр Йошкар-Олы",
+      { action: "tool_call", tool: "get_current_official", args: { jurisdiction: "yoshkar_ola", office_query: "мэр" } },
+    ],
+    [
+      "official-current-head-1",
+      "действующий глава города Йошкар-Олы",
+      {
+        action: "tool_call",
+        tool: "get_current_official",
+        args: { jurisdiction: "yoshkar_ola", office_query: "глава города" },
+      },
+    ],
+    [
+      "official-date-2018-1",
+      "глава города Йошкар-Олы в 2018",
+      {
+        action: "tool_call",
+        tool: "get_official_by_date",
+        args: { jurisdiction: "yoshkar_ola", office_query: "глава города", date: "2018" },
+      },
+    ],
+  ].forEach(([id, question, answer]) => push(id, question, answer, ["officials"]));
+
+  [
+    [
+      "rag-founded-source-1",
+      "источник по основанию Йошкар-Олы",
+      {
+        action: "tool_call",
+        tool: "rag_search",
+        args: {
+          query: "Йошкар-Ола основана 1584 источник",
+          collections: ["city_history", "official_documents"],
+        },
+      },
+    ],
+    [
+      "rag-name-source-1",
+      "источник перевода названия Йошкар-Ола",
+      {
+        action: "tool_call",
+        tool: "rag_search",
+        args: {
+          query: "Йошкар-Ола йошкар красный ола город источник",
+          collections: ["city_history", "official_documents"],
+        },
+      },
+    ],
+  ].forEach(([id, question, answer]) => push(id, question, answer, ["rag_search", "city_history"]));
+
+  return rows;
+}
+
 function buildSafetyTraining(evalQuestions) {
   const rows = [];
   const seenQuestions = new Set(evalQuestions);
@@ -562,6 +707,10 @@ const historyV2 = history.map((row) => ({ ...row, dataset: "router-train-history
 const combinedV2 = sortRows([...entitiesV2, ...safetyV2, ...historyV2]);
 const boostsV3 = buildV3BoostRows(evalV3Questions);
 const combinedV3 = sortRows([...entitiesV2, ...safetyV2, ...historyV2, ...boostsV3]);
+const evalV4 = evalV3.map((row) => ({ ...row, dataset: "router-eval-v4" }));
+const evalV4Questions = new Set(evalV4.map((row) => normalizeQuestion(row.question)));
+const boostsV4 = buildV4BoostRows(evalV4Questions);
+const combinedV4 = sortRows([...combinedV3, ...boostsV4]);
 
 await writeJsonl(OUTPUTS.entities, entities);
 await writeJsonl(OUTPUTS.safety, safety);
@@ -574,6 +723,8 @@ await writeJsonl(OUTPUTS.combinedV2, combinedV2);
 await writeJsonl(OUTPUTS.evalV2, evalV2);
 await writeJsonl(OUTPUTS.combinedV3, combinedV3);
 await writeJsonl(OUTPUTS.evalV3, evalV3);
+await writeJsonl(OUTPUTS.combinedV4, combinedV4);
+await writeJsonl(OUTPUTS.evalV4, evalV4);
 
 console.log(`Generated ${OUTPUTS.entities}: ${entities.length} rows`);
 console.log(`Generated ${OUTPUTS.safety}: ${safety.length} rows`);
@@ -586,3 +737,5 @@ console.log(`Generated ${OUTPUTS.combinedV2}: ${combinedV2.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV2}: ${evalV2.length} rows`);
 console.log(`Generated ${OUTPUTS.combinedV3}: ${combinedV3.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV3}: ${evalV3.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV4}: ${combinedV4.length} rows`);
+console.log(`Generated ${OUTPUTS.evalV4}: ${evalV4.length} rows`);

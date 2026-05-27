@@ -145,3 +145,13 @@
 Исправлено:
 
 - HF eval теперь учитывает `answer_contains` для `direct_answer` и допускает краткий `refuse` по `reason`.
+
+## v0.1.16 - 2026-05-27
+
+Добавлено:
+
+- V4 router train/eval с точечным усилением провалов V3: ordinal school #1, missing entity clarify, private-data refuse, officials и source-required RAG.
+
+Зафиксировано:
+
+- V3 HF Jobs запуск `6a1760965c8d10ffa1104c1c` дал `json_ok 30/30`, `exact_ok 21/30`.

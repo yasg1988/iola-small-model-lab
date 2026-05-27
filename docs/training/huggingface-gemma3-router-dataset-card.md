@@ -34,6 +34,8 @@ SFT-набор для первого LoRA-прогона маленькой rout
 | `data/router-eval-v2.jsonl` | 30 | V2 held-out eval set. |
 | `data/router-train-v3.jsonl` | 829 | V3 train pack with extra alias/search/clarify/refuse/RAG/officials examples. |
 | `data/router-eval-v3.jsonl` | 30 | V3 held-out eval; alias queries expect `entity_name`. |
+| `data/router-train-v4.jsonl` | 856 | V4 train pack with targeted fixes for V3 failures. |
+| `data/router-eval-v4.jsonl` | 30 | V4 held-out eval on the V3 contract surface. |
 
 ## Format
 

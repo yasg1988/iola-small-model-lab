@@ -26,6 +26,8 @@
 | `datasets/router-eval-v2.jsonl` | 30 | V2 eval с `resolve_entity_field`. |
 | `datasets/router-train-v3.jsonl` | 829 | V3 pack: V2 плюс усиление alias/search/clarify/refuse/RAG/officials. |
 | `datasets/router-eval-v3.jsonl` | 30 | V3 eval: alias-запросы ожидают `entity_name`, а не номер. |
+| `datasets/router-train-v4.jsonl` | 856 | V4 pack: точечное усиление провалов V3. |
+| `datasets/router-eval-v4.jsonl` | 30 | V4 eval на той же поверхности, что V3. |
 
 ## Формат
 
