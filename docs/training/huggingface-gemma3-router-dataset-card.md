@@ -38,6 +38,8 @@ SFT-набор для первого LoRA-прогона маленькой rout
 | `data/router-eval-v4.jsonl` | 30 | V4 held-out eval on the V3 contract surface. |
 | `data/router-train-v5.jsonl` | 890 | V5 train pack with targeted fixes for V4 failures. |
 | `data/router-eval-v5.jsonl` | 30 | V5 held-out eval on the V4 contract surface. |
+| `data/router-train-v6.jsonl` | 910 | V6 train pack with salary/private-data refusal reinforcement. |
+| `data/router-eval-v6.jsonl` | 30 | V6 held-out eval on the V5 contract surface. |
 
 ## Format
 

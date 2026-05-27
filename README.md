@@ -136,6 +136,7 @@ MoE/Sparse-кандидаты и раннеры: [исследование MoE/S
 - `datasets/router-train-v3.jsonl` - V3 training pack с усилением alias, search, clarify/refuse, RAG и officials.
 - `datasets/router-train-v4.jsonl` - V4 training pack с точечным усилением провалов V3.
 - `datasets/router-train-v5.jsonl` - V5 training pack с точечным усилением провалов V4.
+- `datasets/router-train-v6.jsonl` - V6 training pack с усилением salary/private-data отказов.
 - `datasets/city-history-stable-facts.jsonl` - стабильные исторические факты Йошкар-Олы для SFT и RAG-source режимов.
 - `scripts/run-evaluation.js` - детерминированные базовые стратегии без LLM.
 - `scripts/run-ollama-evaluation.js` - реальные прогоны через локальный Ollama API.
@@ -172,7 +173,7 @@ npm run validate:router
 
 ## Версия
 
-Текущая публичная версия: `v0.1.17`.
+Текущая публичная версия: `v0.1.18`.
 
 История изменений: [CHANGELOG.md](CHANGELOG.md).
 

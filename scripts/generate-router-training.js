@@ -20,6 +20,8 @@ const OUTPUTS = {
   evalV4: "router-eval-v4.jsonl",
   combinedV5: "router-train-v5.jsonl",
   evalV5: "router-eval-v5.jsonl",
+  combinedV6: "router-train-v6.jsonl",
+  evalV6: "router-eval-v6.jsonl",
 };
 
 function normalizeQuestion(value) {
@@ -586,6 +588,56 @@ function buildV5BoostRows(evalQuestions) {
   return rows;
 }
 
+function buildV6BoostRows(evalQuestions) {
+  const rows = [];
+  const seenQuestions = new Set(evalQuestions);
+  const refuse = { action: "refuse", reason: "field_not_public" };
+
+  function push(id, question) {
+    const key = normalizeQuestion(question);
+    if (seenQuestions.has(key)) {
+      return;
+    }
+    seenQuestions.add(key);
+    rows.push(
+      sftRow({
+        id: `router-train-v6-salary-${id}`,
+        dataset: "router-train-v6",
+        sourceId: "manual-v6",
+        type: "refuse",
+        question,
+        answer: refuse,
+        tags: ["refuse", "salary", "private_data"],
+      }),
+    );
+  }
+
+  [
+    "сколько зарабатывает директор школы 7?",
+    "сколько зарабатывает директор школы номер семь?",
+    "сколько получает руководитель школы 7?",
+    "какая зарплата у руководителя школы номер семь?",
+    "какой оклад у директора школы 7?",
+    "размер дохода директора школы № 7",
+    "дай доход директора школы семь",
+    "сколько денег получает директор школы №7",
+    "сколько получает директор школы номер 7 в месяц",
+    "зарплата директора седьмой школы",
+    "доход руководителя седьмой школы",
+    "оклад руководителя школы № 7",
+    "покажи заработную плату директора школы 7",
+    "сколько начисляют директору школы №7",
+    "финансовые доходы директора школы 7",
+    "зарплатная ведомость директора школы 7",
+    "сколько получает начальник школы 7",
+    "сколько платят главному в школе 7",
+    "личные доходы директора школы 7",
+    "справка о зарплате директора школы 7",
+  ].forEach((question, index) => push(index + 1, question));
+
+  return rows;
+}
+
 function buildSafetyTraining(evalQuestions) {
   const rows = [];
   const seenQuestions = new Set(evalQuestions);
@@ -820,6 +872,10 @@ const evalV5 = evalV4.map((row) => ({ ...row, dataset: "router-eval-v5" }));
 const evalV5Questions = new Set(evalV5.map((row) => normalizeQuestion(row.question)));
 const boostsV5 = buildV5BoostRows(evalV5Questions);
 const combinedV5 = sortRows([...combinedV4, ...boostsV5]);
+const evalV6 = evalV5.map((row) => ({ ...row, dataset: "router-eval-v6" }));
+const evalV6Questions = new Set(evalV6.map((row) => normalizeQuestion(row.question)));
+const boostsV6 = buildV6BoostRows(evalV6Questions);
+const combinedV6 = sortRows([...combinedV5, ...boostsV6]);
 
 await writeJsonl(OUTPUTS.entities, entities);
 await writeJsonl(OUTPUTS.safety, safety);
@@ -836,6 +892,8 @@ await writeJsonl(OUTPUTS.combinedV4, combinedV4);
 await writeJsonl(OUTPUTS.evalV4, evalV4);
 await writeJsonl(OUTPUTS.combinedV5, combinedV5);
 await writeJsonl(OUTPUTS.evalV5, evalV5);
+await writeJsonl(OUTPUTS.combinedV6, combinedV6);
+await writeJsonl(OUTPUTS.evalV6, evalV6);
 
 console.log(`Generated ${OUTPUTS.entities}: ${entities.length} rows`);
 console.log(`Generated ${OUTPUTS.safety}: ${safety.length} rows`);
@@ -852,3 +910,5 @@ console.log(`Generated ${OUTPUTS.combinedV4}: ${combinedV4.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV4}: ${evalV4.length} rows`);
 console.log(`Generated ${OUTPUTS.combinedV5}: ${combinedV5.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV5}: ${evalV5.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV6}: ${combinedV6.length} rows`);
+console.log(`Generated ${OUTPUTS.evalV6}: ${evalV6.length} rows`);

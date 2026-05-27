@@ -30,6 +30,8 @@
 | `datasets/router-eval-v4.jsonl` | 30 | V4 eval на той же поверхности, что V3. |
 | `datasets/router-train-v5.jsonl` | 890 | V5 pack: точечное усиление 6 провалов V4. |
 | `datasets/router-eval-v5.jsonl` | 30 | V5 eval на той же поверхности, что V4. |
+| `datasets/router-train-v6.jsonl` | 910 | V6 pack: усиление salary/private-data отказов. |
+| `datasets/router-eval-v6.jsonl` | 30 | V6 eval на той же поверхности, что V5. |
 
 ## Формат
 
