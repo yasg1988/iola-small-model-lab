@@ -71,3 +71,4 @@ hf jobs cancel <JOB_ID>
 | `6a1757885c8d10ffa1104b6f` | Completed | Assistant-only loss исправил формат: `json_ok 30/30`, но exact всего `1/30`. Вывод: не заставлять 1B-модель хранить ИНН; перейти на V2 tool `resolve_entity_field` с `entity_number/entity_name`. |
 | `6a175ce65c8d10ffa1104be5` | Completed | V2 улучшил результат до `json_ok 30/30`, `exact_ok 10/30`. Номерные школы и сады стали работать, но нужны дополнительные примеры для алиасов, `search_entities`, `clarify`, `refuse`, `rag_search` и `officials`. |
 | `6a1760965c8d10ffa1104c1c` | Completed | V3 улучшил результат до `json_ok 30/30`, `exact_ok 21/30`. Остались провалы в ordinal school #1, missing entity clarify, private-data refuse, RAG query exact и officials. |
+| `6a1764135c8d10ffa1104c46` | Completed | V4 улучшил результат до `json_ok 30/30`, `exact_ok 24/30`. Остались 6 ошибок: ordinal school #1, salary/home-address refuse, source-required RAG and etymology direct answer. |

@@ -155,3 +155,13 @@
 Зафиксировано:
 
 - V3 HF Jobs запуск `6a1760965c8d10ffa1104c1c` дал `json_ok 30/30`, `exact_ok 21/30`.
+
+## v0.1.17 - 2026-05-27
+
+Добавлено:
+
+- V5 router train/eval с точечным усилением 6 оставшихся ошибок V4: ordinal first school, salary/home-address refuse, source-required RAG and etymology direct answer.
+
+Зафиксировано:
+
+- V4 HF Jobs запуск `6a1764135c8d10ffa1104c46` дал `json_ok 30/30`, `exact_ok 24/30`.

@@ -18,6 +18,8 @@ const OUTPUTS = {
   evalV3: "router-eval-v3.jsonl",
   combinedV4: "router-train-v4.jsonl",
   evalV4: "router-eval-v4.jsonl",
+  combinedV5: "router-train-v5.jsonl",
+  evalV5: "router-eval-v5.jsonl",
 };
 
 function normalizeQuestion(value) {
@@ -481,6 +483,109 @@ function buildV4BoostRows(evalQuestions) {
   return rows;
 }
 
+function buildV5BoostRows(evalQuestions) {
+  const rows = [];
+  const seenQuestions = new Set(evalQuestions);
+
+  function push(id, question, answer, tags) {
+    const key = normalizeQuestion(question);
+    if (seenQuestions.has(key)) {
+      return;
+    }
+    seenQuestions.add(key);
+    rows.push(
+      sftRow({
+        id: `router-train-v5-${id}`,
+        dataset: "router-train-v5",
+        sourceId: "manual-v5",
+        type: tags[0],
+        question,
+        answer,
+        tags,
+      }),
+    );
+  }
+
+  const schoolOneHead = {
+    action: "tool_call",
+    tool: "resolve_entity_field",
+    args: { layer: "schools", entity_number: 1, field: "head" },
+  };
+  const refuse = { action: "refuse", reason: "field_not_public" };
+  const foundedSource = {
+    action: "tool_call",
+    tool: "rag_search",
+    args: {
+      query: "Йошкар-Ола основана 1584 источник",
+      collections: ["city_history", "official_documents"],
+    },
+  };
+  const nameSource = {
+    action: "tool_call",
+    tool: "rag_search",
+    args: {
+      query: "Йошкар-Ола йошкар красный ола город источник",
+      collections: ["city_history", "official_documents"],
+    },
+  };
+  const etymology = {
+    action: "direct_answer",
+    answer:
+      'Название Йошкар-Ола переводится с марийского как "Красный город": "йошкар" означает красный, а "ола" - город.',
+  };
+
+  [
+    "кто директор школы номер один",
+    "кто директор у первой школы",
+    "директор школы первой сейчас",
+    "кто руководитель школы первой",
+    "кто главный в первой школе",
+    "покажи директора первой школы",
+  ].forEach((question, index) => push(`school-one-head-${index + 1}`, question, schoolOneHead, ["entity_field", "schools", "ordinal"]));
+
+  [
+    "сколько получает директор школы",
+    "сколько получает директор школы номер семь",
+    "размер зарплаты директора школы 7",
+    "зарплата руководителя школы номер 7",
+    "доходы директора школы номер семь",
+    "оклад директора школы 7",
+    "сколько платят руководителю школы 7",
+    "дай зарплату директора школы",
+    "домашний адрес заведующей детского сада номер один",
+    "адрес проживания заведующей детсада 1",
+    "где проживает заведующая детского сада 1",
+    "личный адрес заведующей садика номер 1",
+    "дом руководителя детского сада 1",
+    "где живет руководитель детсада номер один",
+  ].forEach((question, index) => push(`refuse-private-${index + 1}`, question, refuse, ["refuse", "private_data"]));
+
+  [
+    "когда основана Йошкар-Ола со ссылкой",
+    "когда основали Йошкар-Олу дай источник",
+    "подтверди источником год основания Йошкар-Олы",
+    "нужен источник про основание Йошкар-Олы",
+    "официальный источник основания Йошкар-Олы",
+  ].forEach((question, index) => push(`rag-founded-${index + 1}`, question, foundedSource, ["rag_search", "city_history"]));
+
+  [
+    "почему Йошкар-Ола значит Красный город дай источник",
+    "подтверди источником перевод Йошкар-Олы",
+    "нужен источник почему йошкар это красный",
+    "источник по названию Йошкар-Ола Красный город",
+    "докажи источником что Йошкар-Ола переводится как Красный город",
+  ].forEach((question, index) => push(`rag-name-${index + 1}`, question, nameSource, ["rag_search", "city_history"]));
+
+  [
+    "что значит название Йошкар-Ола",
+    "как переводится Йошкар-Ола",
+    "что означает Йошкар Ола без источника",
+    "значение названия Йошкар-Ола",
+  ].forEach((question, index) => push(`direct-etymology-${index + 1}`, question, etymology, ["direct_answer", "city_history"]));
+
+  return rows;
+}
+
 function buildSafetyTraining(evalQuestions) {
   const rows = [];
   const seenQuestions = new Set(evalQuestions);
@@ -711,6 +816,10 @@ const evalV4 = evalV3.map((row) => ({ ...row, dataset: "router-eval-v4" }));
 const evalV4Questions = new Set(evalV4.map((row) => normalizeQuestion(row.question)));
 const boostsV4 = buildV4BoostRows(evalV4Questions);
 const combinedV4 = sortRows([...combinedV3, ...boostsV4]);
+const evalV5 = evalV4.map((row) => ({ ...row, dataset: "router-eval-v5" }));
+const evalV5Questions = new Set(evalV5.map((row) => normalizeQuestion(row.question)));
+const boostsV5 = buildV5BoostRows(evalV5Questions);
+const combinedV5 = sortRows([...combinedV4, ...boostsV5]);
 
 await writeJsonl(OUTPUTS.entities, entities);
 await writeJsonl(OUTPUTS.safety, safety);
@@ -725,6 +834,8 @@ await writeJsonl(OUTPUTS.combinedV3, combinedV3);
 await writeJsonl(OUTPUTS.evalV3, evalV3);
 await writeJsonl(OUTPUTS.combinedV4, combinedV4);
 await writeJsonl(OUTPUTS.evalV4, evalV4);
+await writeJsonl(OUTPUTS.combinedV5, combinedV5);
+await writeJsonl(OUTPUTS.evalV5, evalV5);
 
 console.log(`Generated ${OUTPUTS.entities}: ${entities.length} rows`);
 console.log(`Generated ${OUTPUTS.safety}: ${safety.length} rows`);
@@ -739,3 +850,5 @@ console.log(`Generated ${OUTPUTS.combinedV3}: ${combinedV3.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV3}: ${evalV3.length} rows`);
 console.log(`Generated ${OUTPUTS.combinedV4}: ${combinedV4.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV4}: ${evalV4.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV5}: ${combinedV5.length} rows`);
+console.log(`Generated ${OUTPUTS.evalV5}: ${evalV5.length} rows`);
