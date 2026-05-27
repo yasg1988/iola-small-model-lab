@@ -84,3 +84,12 @@
 
 - Скрипт `run-router-eval.js` для Ollama-прогона router-моделей в JSON-mode.
 - Router baseline по `gemma3:1b`, `qwen3:1.7b` и `batiai/gemma4-e2b:q4`; Gemma 4 E2B Q4 показала лучший сырой router-сигнал, но требует больше ресурсов.
+
+## v0.1.9 - 2026-05-27
+
+Добавлено:
+
+- Training pack `router-train-v1.jsonl` на 810 SFT-примеров для первого LoRA-прогона `gemma3:1b`.
+- Раздельные train-файлы: `router-train-entities`, `router-train-safety`, `router-train-history`.
+- Генератор `generate-router-training.js`, который исключает точные пересечения с `router-eval-v1`.
+- Валидатор `validate-router-datasets.js` для строгого JSON/tool-call контракта, разрешенных tools/layers/fields и train/eval overlap.
