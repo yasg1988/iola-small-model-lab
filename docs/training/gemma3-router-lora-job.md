@@ -61,3 +61,9 @@ hf jobs cancel <JOB_ID>
 - `exact_ok`: заметно выше сырого baseline `2/30`.
 
 Если exact-match недостаточен, следующий прогон делать не увеличением модели, а улучшением train-набора и loss-маски под assistant-ответ.
+
+## Журнал запусков
+
+| Job | Статус | Вывод |
+| --- | --- | --- |
+| `6a1753683a4b8cae6044cb3d` | Error | Первый запуск дошел до загрузки модели и train-набора, но упал на backward из-за `gradient_checkpointing` с LoRA: `element 0 of tensors does not require grad`. Для следующего запуска checkpointing отключен. |

@@ -194,7 +194,7 @@ def main():
         save_total_limit=2,
         fp16=torch.cuda.is_available(),
         bf16=False,
-        gradient_checkpointing=True,
+        gradient_checkpointing=False,
         report_to=[],
         remove_unused_columns=False,
     )

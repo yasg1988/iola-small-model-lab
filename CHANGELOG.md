@@ -109,3 +109,9 @@
 - HF Jobs/UV training script `training/train_gemma3_router_lora.py` для LoRA-обучения `google/gemma-3-1b-it`.
 - Документация запуска `gemma3-router-lora-job.md` с командой, лимитом времени, мониторингом и критерием приемки.
 - Фиксация output model repo `LMSerg/iola-gemma3-router-gemma3-1b-lora`.
+
+## v0.1.12 - 2026-05-27
+
+Исправлено:
+
+- Первый HF Jobs запуск LoRA упал на backward из-за `gradient_checkpointing` с LoRA. Для короткого T4-прогона checkpointing отключен в training script.
