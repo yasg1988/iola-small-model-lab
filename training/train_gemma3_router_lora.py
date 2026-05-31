@@ -28,6 +28,17 @@ from transformers import (
     set_seed,
 )
 
+DEFAULT_ROUTER_SYSTEM_PROMPT = """You are the IOLA CLI router for public open data of Yoshkar-Ola.
+Return exactly one JSON object. Do not use markdown. Do not add explanations.
+Allowed actions: tool_call, clarify, refuse, direct_answer.
+Allowed tools: resolve_entity_field, search_entities, rag_search, get_current_official, get_official_by_date.
+For schools and kindergartens, do not answer mutable facts from memory. Use resolve_entity_field or search_entities.
+Allowed organization layers: schools, kindergartens.
+Allowed organization fields: name, inn, address, email, website, phone, head, license_status.
+If the user asks for a source about city history, use rag_search. If no source is requested and the fact is stable, direct_answer is allowed.
+If the request is ambiguous, return clarify. If the requested field is not public, return refuse with reason field_not_public.
+If the user asks to confirm a possibly false value, call the exact tool and pass that value as args.must_refute_user_value."""
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -43,6 +54,8 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--grad-accum", type=int, default=8)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--system-prompt", default=DEFAULT_ROUTER_SYSTEM_PROMPT)
+    parser.add_argument("--append-no-think", action="store_true")
     return parser.parse_args()
 
 
@@ -74,6 +87,32 @@ def normalize_expected(row):
 
 def compact_json(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+
+
+def with_system_prompt(messages, system_prompt):
+    if not system_prompt:
+        return messages
+
+    if messages and messages[0].get("role") == "system":
+        return messages
+
+    return [{"role": "system", "content": system_prompt}, *messages]
+
+
+def with_no_think(messages):
+    updated = []
+    last_user_index = -1
+    for index, message in enumerate(messages):
+        if message.get("role") == "user":
+            last_user_index = index
+        updated.append(dict(message))
+
+    if last_user_index >= 0:
+        content = str(updated[last_user_index].get("content", "")).rstrip()
+        if "/no_think" not in content:
+            updated[last_user_index]["content"] = f"{content}\n/no_think"
+
+    return updated
 
 
 def is_expected_match(parsed, expected):
@@ -203,8 +242,15 @@ def main():
     )
 
     def tokenize_row(row):
-        prompt_text = format_chat(tokenizer, row["messages"][:1], add_generation_prompt=True)
-        text = format_chat(tokenizer, row["messages"], add_generation_prompt=False)
+        prompt_messages = row["messages"][:1]
+        full_messages = row["messages"]
+        if args.append_no_think:
+            prompt_messages = with_no_think(prompt_messages)
+            full_messages = with_no_think(full_messages)
+        prompt_messages = with_system_prompt(prompt_messages, args.system_prompt)
+        full_messages = with_system_prompt(full_messages, args.system_prompt)
+        prompt_text = format_chat(tokenizer, prompt_messages, add_generation_prompt=True)
+        text = format_chat(tokenizer, full_messages, add_generation_prompt=False)
         if tokenizer.eos_token and not text.endswith(tokenizer.eos_token):
             text += tokenizer.eos_token
 
@@ -274,7 +320,12 @@ def main():
     for row in eval_rows:
         prompt = format_chat(
             tokenizer,
-            [{"role": "user", "content": row["question"]}],
+            with_system_prompt(
+                with_no_think([{"role": "user", "content": row["question"]}])
+                if args.append_no_think
+                else [{"role": "user", "content": row["question"]}],
+                args.system_prompt,
+            ),
             add_generation_prompt=True,
         )
         encoded = tokenizer(prompt, return_tensors="pt").to(model.device)
@@ -321,6 +372,8 @@ def main():
         "train_file": args.train_file,
         "eval_file": args.eval_file,
         "max_steps": args.max_steps,
+        "system_prompt": args.system_prompt,
+        "append_no_think": args.append_no_think,
         "eval_total": len(predictions),
         "json_ok": json_ok,
         "exact_ok": exact_ok,

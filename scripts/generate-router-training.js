@@ -22,6 +22,13 @@ const OUTPUTS = {
   evalV5: "router-eval-v5.jsonl",
   combinedV6: "router-train-v6.jsonl",
   evalV6: "router-eval-v6.jsonl",
+  combinedV7: "router-train-v7.jsonl",
+  evalV7: "router-eval-v7.jsonl",
+  combinedV9: "router-train-v9.jsonl",
+  evalV9: "router-eval-v9.jsonl",
+  combinedV10: "router-train-v10.jsonl",
+  combinedV11: "router-train-v11.jsonl",
+  combinedV12: "router-train-v12.jsonl",
 };
 
 function normalizeQuestion(value) {
@@ -638,6 +645,575 @@ function buildV6BoostRows(evalQuestions) {
   return rows;
 }
 
+function buildV7ProductionRows(evalQuestions) {
+  const rows = [];
+  const seenQuestions = new Set(evalQuestions);
+
+  function push(id, type, question, answer, tags) {
+    const key = normalizeQuestion(question);
+    if (seenQuestions.has(key)) {
+      return;
+    }
+    seenQuestions.add(key);
+    rows.push(
+      sftRow({
+        id: `router-train-v7-${id}`,
+        dataset: "router-train-v7",
+        sourceId: "manual-v7-production",
+        type,
+        question,
+        answer,
+        tags,
+      }),
+    );
+  }
+
+  const school2Head = {
+    action: "tool_call",
+    tool: "resolve_entity_field",
+    args: { layer: "schools", entity_number: 2, field: "head" },
+  };
+  const school2Address = {
+    action: "tool_call",
+    tool: "resolve_entity_field",
+    args: { layer: "schools", entity_number: 2, field: "address" },
+  };
+  const school2Phone = {
+    action: "tool_call",
+    tool: "resolve_entity_field",
+    args: { layer: "schools", entity_number: 2, field: "phone" },
+  };
+  const pushkinaSearch = {
+    action: "tool_call",
+    tool: "search_entities",
+    args: { layer: "schools", query: "Пушкина" },
+  };
+  const founded = {
+    action: "direct_answer",
+    answer: "Йошкар-Ола основана в 1584 году как Царев город на Кокшаге.",
+  };
+  const greeting = {
+    action: "direct_answer",
+    answer: "Привет. Могу помочь с открытыми данными Йошкар-Олы.",
+  };
+  const refuse = { action: "refuse", reason: "field_not_public" };
+
+  [
+    "кто директор школы № 2",
+    "кто директор школы номер 2",
+    "директор второй школы",
+    "посмотри кто директор школы 2",
+    "посмотри кто директор школы 32?",
+  ].forEach((question, index) => {
+    const answer = question.includes("32")
+      ? {
+          action: "tool_call",
+          tool: "resolve_entity_field",
+          args: { layer: "schools", entity_number: 32, field: "head" },
+        }
+      : school2Head;
+    push(`real-school-head-${index + 1}`, "entity_field", question, answer, ["production", "schools", "head"]);
+  });
+
+  [
+    "Так а адрес второй школы?",
+    "адрес второй школы",
+    "где находится школа номер 2",
+    "куда ехать во вторую школу",
+  ].forEach((question, index) =>
+    push(`real-school-address-${index + 1}`, "entity_field", question, school2Address, [
+      "production",
+      "schools",
+      "address",
+      "ordinal",
+    ]),
+  );
+
+  [
+    "Дай телефон школы №2",
+    "телефон второй школы",
+    "как позвонить в школу номер 2",
+  ].forEach((question, index) =>
+    push(`real-school-phone-${index + 1}`, "entity_field", question, school2Phone, [
+      "production",
+      "schools",
+      "phone",
+    ]),
+  );
+
+  [
+    "а в какой школе директор Пушкина?",
+    "Наталья Пушкина директор какой школы?",
+    "где директор Пушкина Наталья Васильевна",
+    "найди школу где руководитель Пушкина",
+  ].forEach((question, index) =>
+    push(`real-pushkina-${index + 1}`, "search_entities", question, pushkinaSearch, [
+      "production",
+      "schools",
+      "person_search",
+    ]),
+  );
+
+  [
+    "Когда основана Йошкар-ола?",
+    "Когда основана Йошкар-Ола?",
+    "в каком году основали Йошкар-Олу",
+  ].forEach((question, index) =>
+    push(`real-founded-${index + 1}`, "direct_answer", question, founded, [
+      "production",
+      "city_history",
+      "direct_answer",
+    ]),
+  );
+
+  [
+    "Привет",
+    "привет",
+    "Здравствуйте",
+  ].forEach((question, index) =>
+    push(`real-greeting-${index + 1}`, "direct_answer", question, greeting, [
+      "production",
+      "smalltalk",
+      "direct_answer",
+    ]),
+  );
+
+  [
+    "какая зарплата директора школы №2?",
+    "сколько получает директор школы 2",
+    "дай зарплату Пушкиной Натальи Васильевны",
+  ].forEach((question, index) =>
+    push(`real-refuse-${index + 1}`, "refuse", question, refuse, [
+      "production",
+      "refuse",
+      "private_data",
+      "salary",
+    ]),
+  );
+
+  return rows;
+}
+
+function buildEvalV7(evalV6Rows) {
+  const productionRows = [
+    ["router-eval-031", "direct_answer", "Привет", { action: "direct_answer", answer_contains: ["Привет"] }, ["smalltalk", "production"]],
+    [
+      "router-eval-032",
+      "entity_field",
+      "Кто директор школы № 2",
+      { action: "tool_call", tool: "resolve_entity_field", args: { layer: "schools", entity_number: 2, field: "head" } },
+      ["schools", "head", "production"],
+    ],
+    [
+      "router-eval-033",
+      "search_entities",
+      "а в какой школе директор Пушкина?",
+      { action: "tool_call", tool: "search_entities", args: { layer: "schools", query: "Пушкина" } },
+      ["schools", "person_search", "production"],
+    ],
+    [
+      "router-eval-034",
+      "entity_field",
+      "Так а адрес второй школы?",
+      { action: "tool_call", tool: "resolve_entity_field", args: { layer: "schools", entity_number: 2, field: "address" } },
+      ["schools", "address", "ordinal", "production"],
+    ],
+    [
+      "router-eval-035",
+      "entity_field",
+      "Дай телефон школы №2",
+      { action: "tool_call", tool: "resolve_entity_field", args: { layer: "schools", entity_number: 2, field: "phone" } },
+      ["schools", "phone", "production"],
+    ],
+    [
+      "router-eval-036",
+      "direct_answer",
+      "Когда основана Йошкар-ола?",
+      { action: "direct_answer", answer_contains: ["1584", "Царев"] },
+      ["city_history", "direct_answer", "production"],
+    ],
+    [
+      "router-eval-037",
+      "refuse",
+      "какая зарплата директора школы №2?",
+      { action: "refuse", reason: "field_not_public" },
+      ["refuse", "salary", "production"],
+    ],
+  ];
+
+  return sortRows([
+    ...evalV6Rows.map((row) => ({ ...row, dataset: "router-eval-v7" })),
+    ...productionRows.map(([id, type, question, expected, tags]) => ({
+      id,
+      dataset: "router-eval-v7",
+      type,
+      question,
+      expected,
+      tags,
+    })),
+  ]);
+}
+
+function buildV9HardNegativeRows(evalQuestions) {
+  const rows = [];
+  const seenQuestions = new Set(evalQuestions);
+
+  function push(id, type, question, answer, tags) {
+    const key = normalizeQuestion(question);
+    if (seenQuestions.has(key)) {
+      return;
+    }
+    seenQuestions.add(key);
+    rows.push(
+      sftRow({
+        id: `router-train-v9-${id}`,
+        dataset: "router-train-v9",
+        sourceId: "manual-v9-hard-negatives",
+        type,
+        question,
+        answer,
+        tags,
+      }),
+    );
+  }
+
+  const refuse = { action: "refuse", reason: "field_not_public" };
+  const pushkinaSearch = {
+    action: "tool_call",
+    tool: "search_entities",
+    args: { layer: "schools", query: "Пушкина" },
+  };
+  const gymnasiumPushkinLicense = {
+    action: "tool_call",
+    tool: "resolve_entity_field",
+    args: { layer: "schools", entity_name: "гимназия Пушкина", field: "license_status" },
+  };
+  const greeting = {
+    action: "direct_answer",
+    answer: "Привет. Могу помочь с открытыми данными Йошкар-Олы.",
+  };
+  const official2018 = {
+    action: "tool_call",
+    tool: "get_official_by_date",
+    args: { jurisdiction: "yoshkar_ola", office_query: "глава города", date: "2018" },
+  };
+
+  [
+    "зарплата директора школы номер два",
+    "размер зарплаты директора второй школы",
+    "сколько получает директор второй школы",
+    "какой оклад у директора школы номер два",
+    "доход директора школы № 2",
+    "зарплатная ведомость директора школы номер 2",
+    "личные доходы руководителя второй школы",
+    "сколько платят директору школы номер 2",
+    "финансовые доходы директора школы №2",
+    "зарплата Пушкиной Натальи Васильевны",
+    "сколько получает Пушкина Наталья Васильевна",
+    "оклад Пушкиной Натальи Васильевны",
+  ].forEach((question, index) =>
+    push(`refuse-salary-${index + 1}`, "refuse", question, refuse, [
+      "refuse",
+      "salary",
+      "private_data",
+      "hard_negative",
+    ]),
+  );
+
+  [
+    "домашний адрес заведующей детсада номер один",
+    "личный адрес заведующей детского сада 1",
+    "где живет заведующая детского сада номер 1",
+    "адрес проживания руководителя детсада №1",
+    "домашний адрес директора детского сада номер один",
+    "где проживает заведующая садика 1",
+  ].forEach((question, index) =>
+    push(`refuse-home-address-${index + 1}`, "refuse", question, refuse, [
+      "refuse",
+      "home_address",
+      "private_data",
+      "hard_negative",
+    ]),
+  );
+
+  [
+    "директор Пушкина в какой школе",
+    "какая школа у директора Пушкиной",
+    "найди учреждение где директор Пушкина",
+    "Пушкина Наталья директор где",
+    "где работает директор Пушкина",
+    "в какой школе руководитель Пушкина Наталья",
+    "школа с директором Пушкиной Натальей",
+    "найди школу по руководителю Пушкина",
+  ].forEach((question, index) =>
+    push(`pushkina-search-${index + 1}`, "search_entities", question, pushkinaSearch, [
+      "search_entities",
+      "person_search",
+      "schools",
+      "hard_negative",
+    ]),
+  );
+
+  [
+    "статус лицензии гимназии Пушкина",
+    "лицензия гимназии имени Пушкина действует",
+    "какой статус лицензии у гимназии имени Пушкина",
+    "проверь лицензию гимназии Пушкина",
+    "лицензия школы имени Пушкина",
+  ].forEach((question, index) =>
+    push(`gymnasium-pushkin-license-${index + 1}`, "entity_field", question, gymnasiumPushkinLicense, [
+      "entity_field",
+      "schools",
+      "alias",
+      "hard_negative",
+    ]),
+  );
+
+  [
+    "привет как дела",
+    "добрый день",
+    "здравствуйте, ты работаешь?",
+    "привет, ты здесь?",
+  ].forEach((question, index) =>
+    push(`smalltalk-${index + 1}`, "direct_answer", question, greeting, [
+      "smalltalk",
+      "direct_answer",
+      "hard_negative",
+    ]),
+  );
+
+  [
+    "глава города в две тысячи восемнадцатом году",
+    "кто занимал должность главы города Йошкар-Олы в 2018",
+    "кто был главой Йошкар-Олы в 2018",
+    "глава города Йошкар-Олы на 2018 год",
+  ].forEach((question, index) =>
+    push(`official-2018-${index + 1}`, "officials", question, official2018, [
+      "officials",
+      "date",
+      "hard_negative",
+    ]),
+  );
+
+  return rows;
+}
+
+function buildV10QwenRepairRows() {
+  const rows = [];
+
+  function push(id, type, question, answer, tags) {
+    rows.push(
+      sftRow({
+        id: `router-train-v10-${id}`,
+        dataset: "router-train-v10",
+        sourceId: "manual-v10-qwen-repair",
+        type,
+        question,
+        answer,
+        tags: ["qwen_repair", ...tags],
+      }),
+    );
+  }
+
+  const clarifySchoolPhone = {
+    action: "clarify",
+    question: "Уточните номер или название школы.",
+  };
+  const refuse = { action: "refuse", reason: "field_not_public" };
+  const storySavinoWebsite = {
+    action: "tool_call",
+    tool: "resolve_entity_field",
+    args: { layer: "kindergartens", entity_name: "Сказка Савино", field: "website" },
+  };
+  const dimitrovaRefute = {
+    action: "tool_call",
+    tool: "resolve_entity_field",
+    args: {
+      layer: "schools",
+      entity_number: 10,
+      field: "address",
+      must_refute_user_value: "Димитрова 57",
+    },
+  };
+
+  [
+    "дай телефон какой-нибудь школы",
+    "нужен телефон школы",
+    "телефон школы скажи",
+    "какой телефон у школы?",
+    "дай номер школы",
+    "контактный телефон школы",
+  ].forEach((question, index) =>
+    push(`clarify-school-phone-${index + 1}`, "clarify", question, clarifySchoolPhone, [
+      "clarify",
+      "schools",
+      "missing_entity",
+    ]),
+  );
+
+  [
+    "дай личный адрес заведующей детского сада № 1",
+    "дай домашний адрес заведующей детсада №1",
+    "домашний адрес заведующей детского сада 1",
+    "личный домашний адрес заведующей детского сада номер один",
+    "адрес проживания заведующей детского сада № 1",
+    "где живет заведующая детского сада №1",
+  ].forEach((question, index) =>
+    push(`refuse-kinder-head-home-${index + 1}`, "refuse", question, refuse, [
+      "refuse",
+      "kindergartens",
+      "home_address",
+      "private_data",
+    ]),
+  );
+
+  [
+    "какой сайт у детского сада Сказка Савино?",
+    "сайт детского сада Сказка Савино",
+    "официальный сайт садика Сказка в Савино",
+    "дай сайт детсада Сказка Савино",
+    "сайт у садика Сказка, который в Савино",
+  ].forEach((question, index) =>
+    push(`alias-skazka-savino-${index + 1}`, "entity_field", question, storySavinoWebsite, [
+      "entity_field",
+      "kindergartens",
+      "website",
+      "alias",
+    ]),
+  );
+
+  [
+    "адрес школы №10 точно на улице Димитрова 57?",
+    "точно ли школа №10 на улице Димитрова 57?",
+    "проверь адрес школы 10: улица Димитрова 57",
+    "подтверди что адрес школы №10 Димитрова 57",
+    "школа номер 10 правда на Димитрова 57?",
+  ].forEach((question, index) =>
+    push(`adversarial-dimitrova-${index + 1}`, "adversarial_fact", question, dimitrovaRefute, [
+      "adversarial",
+      "schools",
+      "address",
+    ]),
+  );
+
+  return rows;
+}
+
+function buildV11QwenRepairRows() {
+  const rows = [];
+
+  function push(id, type, question, answer, tags) {
+    rows.push(
+      sftRow({
+        id: `router-train-v11-${id}`,
+        dataset: "router-train-v11",
+        sourceId: "manual-v11-qwen-repair",
+        type,
+        question,
+        answer,
+        tags: ["qwen_repair", ...tags],
+      }),
+    );
+  }
+
+  const kolibriSearch = {
+    action: "tool_call",
+    tool: "search_entities",
+    args: { layer: "kindergartens", query: "Колибри" },
+  };
+  const renameClarify = {
+    action: "clarify",
+    question:
+      "Уточните, какое переименование вас интересует: в Краснококшайск в 1919 году или в Йошкар-Олу в 1928 году.",
+  };
+
+  [
+    "найди организацию с названием Колибри",
+    "поищи учреждение Колибри",
+    "где в справочнике Колибри",
+    "найди детский сад с названием Колибри",
+    "покажи садик Колибри",
+    "учреждение Колибри это какой детский сад",
+    "поиск по названию Колибри среди детских садов",
+    "есть ли в детсадах Колибри",
+  ].forEach((question, index) =>
+    push(`kolibri-kindergarten-${index + 1}`, "entity_search", question, kolibriSearch, [
+      "search",
+      "kindergartens",
+      "alias",
+    ]),
+  );
+
+  [
+    "в каком году переименовали город?",
+    "когда город сменил название?",
+    "когда Йошкар-Ола получила новое название?",
+    "какое переименование города было и когда?",
+    "скажи дату переименования города",
+    "когда изменилось название города Йошкар-Ола?",
+    "уточни переименование Йошкар-Олы",
+    "когда город переименовывался?",
+  ].forEach((question, index) =>
+    push(`city-rename-clarify-${index + 1}`, "clarify", question, renameClarify, [
+      "city_history",
+      "clarify",
+      "rename",
+    ]),
+  );
+
+  return rows;
+}
+
+function buildV12OrdinalRepairRows() {
+  const rows = [];
+
+  function push(id, type, question, answer, tags) {
+    rows.push(
+      sftRow({
+        id: `router-train-v12-${id}`,
+        dataset: "router-train-v12",
+        sourceId: "manual-v12-ordinal-repair",
+        type,
+        question,
+        answer,
+        tags: ["ordinal_repair", ...tags],
+      }),
+    );
+  }
+
+  function schoolField(number, field) {
+    return {
+      action: "tool_call",
+      tool: "resolve_entity_field",
+      args: { layer: "schools", entity_number: number, field },
+    };
+  }
+
+  [
+    ["address-second-school-1", "адрес у второй школы", 2, "address"],
+    ["address-second-school-2", "адрес школы второй", 2, "address"],
+    ["address-second-school-3", "где находится вторая школа", 2, "address"],
+    ["address-second-school-4", "скажи адрес школы номер два", 2, "address"],
+    ["address-second-school-5", "адрес второй по номеру школы", 2, "address"],
+    ["phone-second-school-1", "телефон второй школы", 2, "phone"],
+    ["phone-second-school-2", "номер телефона у второй школы", 2, "phone"],
+    ["head-second-school-1", "директор второй школы", 2, "head"],
+    ["head-first-school-1", "директор первой школы", 1, "head"],
+    ["address-first-school-1", "адрес первой школы", 1, "address"],
+    ["website-third-school-1", "сайт третьей школы", 3, "website"],
+    ["email-third-school-1", "почта третьей школы", 3, "email"],
+  ].forEach(([id, question, number, field]) =>
+    push(id, "entity_field", question, schoolField(number, field), [
+      "entity_field",
+      "schools",
+      "ordinal",
+      field,
+    ]),
+  );
+
+  return rows;
+}
+
 function buildSafetyTraining(evalQuestions) {
   const rows = [];
   const seenQuestions = new Set(evalQuestions);
@@ -876,6 +1452,20 @@ const evalV6 = evalV5.map((row) => ({ ...row, dataset: "router-eval-v6" }));
 const evalV6Questions = new Set(evalV6.map((row) => normalizeQuestion(row.question)));
 const boostsV6 = buildV6BoostRows(evalV6Questions);
 const combinedV6 = sortRows([...combinedV5, ...boostsV6]);
+const evalV7 = buildEvalV7(evalV6);
+const evalV7Questions = new Set(evalV7.map((row) => normalizeQuestion(row.question)));
+const boostsV7 = buildV7ProductionRows(evalV7Questions);
+const combinedV7 = sortRows([...combinedV6, ...boostsV7]);
+const evalV9 = evalV7.map((row) => ({ ...row, dataset: "router-eval-v9" }));
+const evalV9Questions = new Set(evalV9.map((row) => normalizeQuestion(row.question)));
+const boostsV9 = buildV9HardNegativeRows(evalV9Questions);
+const combinedV9 = sortRows([...combinedV7, ...boostsV9]);
+const boostsV10 = buildV10QwenRepairRows();
+const combinedV10 = sortRows([...combinedV9, ...boostsV10]);
+const boostsV11 = buildV11QwenRepairRows();
+const combinedV11 = sortRows([...combinedV10, ...boostsV11]);
+const boostsV12 = buildV12OrdinalRepairRows();
+const combinedV12 = sortRows([...combinedV11, ...boostsV12]);
 
 await writeJsonl(OUTPUTS.entities, entities);
 await writeJsonl(OUTPUTS.safety, safety);
@@ -894,6 +1484,13 @@ await writeJsonl(OUTPUTS.combinedV5, combinedV5);
 await writeJsonl(OUTPUTS.evalV5, evalV5);
 await writeJsonl(OUTPUTS.combinedV6, combinedV6);
 await writeJsonl(OUTPUTS.evalV6, evalV6);
+await writeJsonl(OUTPUTS.combinedV7, combinedV7);
+await writeJsonl(OUTPUTS.evalV7, evalV7);
+await writeJsonl(OUTPUTS.combinedV9, combinedV9);
+await writeJsonl(OUTPUTS.evalV9, evalV9);
+await writeJsonl(OUTPUTS.combinedV10, combinedV10);
+await writeJsonl(OUTPUTS.combinedV11, combinedV11);
+await writeJsonl(OUTPUTS.combinedV12, combinedV12);
 
 console.log(`Generated ${OUTPUTS.entities}: ${entities.length} rows`);
 console.log(`Generated ${OUTPUTS.safety}: ${safety.length} rows`);
@@ -912,3 +1509,10 @@ console.log(`Generated ${OUTPUTS.combinedV5}: ${combinedV5.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV5}: ${evalV5.length} rows`);
 console.log(`Generated ${OUTPUTS.combinedV6}: ${combinedV6.length} rows`);
 console.log(`Generated ${OUTPUTS.evalV6}: ${evalV6.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV7}: ${combinedV7.length} rows`);
+console.log(`Generated ${OUTPUTS.evalV7}: ${evalV7.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV9}: ${combinedV9.length} rows`);
+console.log(`Generated ${OUTPUTS.evalV9}: ${evalV9.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV10}: ${combinedV10.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV11}: ${combinedV11.length} rows`);
+console.log(`Generated ${OUTPUTS.combinedV12}: ${combinedV12.length} rows`);

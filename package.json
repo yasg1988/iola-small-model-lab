@@ -14,13 +14,15 @@
     "run:baseline": "node bin/iola-model-lab.js run-baseline",
     "run:ollama": "node bin/iola-model-lab.js run-ollama",
     "run:router": "node scripts/run-router-eval.js",
+    "run:router:chat": "node scripts/run-ollama-router-chat-eval.js",
+    "run:router:worker": "node scripts/run-transformers-router-worker-eval.js",
     "generate:router": "node scripts/generate-router-training.js",
     "validate:router": "node scripts/validate-router-datasets.js",
     "generate:history": "node scripts/generate-history-training.js",
     "validate:history": "node scripts/validate-history-datasets.js",
     "summary": "node bin/iola-model-lab.js summary",
     "summary:ollama": "node bin/iola-model-lab.js summary-ollama",
-    "test": "node --check bin/iola-model-lab.js && node --check lib/common.js && node --check lib/concepts.js && node --check lib/ollama.js && node --check lib/prompts.js && node --check scripts/generate-datasets.js && node --check scripts/generate-history-training.js && node --check scripts/generate-router-training.js && node --check scripts/run-evaluation.js && node --check scripts/run-ollama-evaluation.js && node --check scripts/run-router-eval.js && node --check scripts/summarize-results.js && node --check scripts/summarize-ollama-results.js && node --check scripts/validate-history-datasets.js && node --check scripts/validate-router-datasets.js"
+    "test": "node --check bin/iola-model-lab.js && node --check lib/common.js && node --check lib/concepts.js && node --check lib/ollama.js && node --check lib/prompts.js && node --check scripts/generate-datasets.js && node --check scripts/generate-history-training.js && node --check scripts/generate-router-training.js && node --check scripts/run-evaluation.js && node --check scripts/run-ollama-evaluation.js && node --check scripts/run-ollama-router-chat-eval.js && node --check scripts/run-router-eval.js && node --check scripts/run-transformers-router-worker-eval.js && node --check scripts/summarize-results.js && node --check scripts/summarize-ollama-results.js && node --check scripts/validate-history-datasets.js && node --check scripts/validate-router-datasets.js"
   },
   "keywords": [
     "yoshkar-ola",
