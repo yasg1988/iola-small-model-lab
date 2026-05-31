@@ -1,0 +1,16 @@
+{
+  "runId": "2026-05-31T12-41-17-824Z",
+  "model": "iola-router:qwen3-1.7b-v4-q8",
+  "dataset": "router-eval-stress-weird-typos-v1",
+  "systemPrompt": true,
+  "qwenNoThink": true,
+  "numPredict": 180,
+  "limit": 0,
+  "total": 200,
+  "validJson": 197,
+  "exact": 123,
+  "exactRate": 0.615,
+  "jsonRate": 0.985,
+  "avgLatencyMs": 3859.32,
+  "avgEvalDurationMs": 3323.51
+}
